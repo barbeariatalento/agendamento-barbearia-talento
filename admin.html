@@ -77,6 +77,17 @@ input { border: 1px solid #ccc; }
   <h3>Agendamentos</h3>
   <p>Selecione um profissional para consultar os horários.</p>
 <div id="listaHorarios"></div>
+  <div id="calendario" style="margin-top:20px;">
+  <h3>Calendário de Agendamentos</h3>
+
+  <label>Escolha o dia:</label>
+  <input type="date" id="dataAgenda">
+
+  <h3>Horários disponíveis</h3>
+  <div id="horariosDisponiveis">
+    Selecione uma data para consultar.
+  </div>
+</div>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
