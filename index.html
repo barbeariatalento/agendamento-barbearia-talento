@@ -92,6 +92,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     .order("nome");
 
   if (error) {
+    alert("Erro ao carregar profissionais: " + error.message);
     console.error(error);
     campo.options[0].textContent = "Erro ao carregar profissionais";
     return;
