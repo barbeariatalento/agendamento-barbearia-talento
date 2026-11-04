@@ -116,7 +116,7 @@ carregarProfissionais();
     const dia = String(hoje.getDate()).padStart(2,"0");
     data.min = `${ano}-${mes}-${dia}`;
 
-    function atualizarHorarios() {
+ async function atualizarHorarios() {
       horario.innerHTML =
         '<option value="">Selecione o horário</option>';
 
