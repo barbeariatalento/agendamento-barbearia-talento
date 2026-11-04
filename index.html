@@ -230,6 +230,7 @@ document.getElementById("agenda")
 
     if (error) {
       console.error(error);
+      alert("Erro: " + error.message);
       mensagem.textContent =
         "Não foi possível agendar. Verifique se o horário está livre.";
       return;
