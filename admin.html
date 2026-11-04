@@ -232,22 +232,59 @@ async function consultarHorarios() {
     return;
   }
 
-  horarios.replaceChildren();
+horarios.replaceChildren();
 
-  agendamentos.forEach(item => {
-    const linha = document.createElement("p");
-    const hora = new Date(item.inicio).toLocaleTimeString(
-      "pt-BR",
-      { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }
-    );
+const duracao = Number(campoServico.value);
 
-    linha.textContent = `${hora} - ${item.status}`;
-    horarios.appendChild(linha);
+if (!duracao) {
+  horarios.textContent = "Escolha um serviço para ver os horários.";
+  return;
+}
+
+const diaSemana = new Date(data + "T12:00:00").getDay();
+
+if (diaSemana === 0 || diaSemana === 1) {
+  horarios.textContent = "Barbearia fechada neste dia.";
+  return;
+}
+
+const abertura = diaSemana === 6 ? 8 * 60 : 9 * 60;
+const fechamento = diaSemana === 6 ? 18 * 60 : 20 * 60;
+
+const formatarMinutos = (total) => {
+  const h = String(Math.floor(total / 60)).padStart(2, "0");
+  const m = String(total % 60).padStart(2, "0");
+  return `${h}:${m}`;
+};
+
+let livres = 0;
+
+for (let minuto = abertura; minuto + duracao <= fechamento; minuto += 10) {
+  const hora = formatarMinutos(minuto);
+
+  const inicioSlot = new Date(`${data}T${hora}:00-03:00`);
+  const fimSlot = new Date(inicioSlot.getTime() + duracao * 60000);
+
+  const ocupado = (agendamentos || []).some(item => {
+    if (item.status === "cancelado") return false;
+
+    const inicioAgendado = new Date(item.inicio);
+    const fimAgendado = new Date(item.fim);
+
+    return inicioSlot < fimAgendado && fimSlot > inicioAgendado;
   });
 
-  if (!agendamentos.length) {
-    horarios.textContent = "Nenhum agendamento encontrado nesta data.";
+  if (!ocupado) {
+    const linha = document.createElement("p");
+    linha.textContent = `🟢 ${hora} - Disponível`;
+    horarios.appendChild(linha);
+    livres++;
   }
+}
+
+if (livres === 0) {
+  horarios.textContent = "Nenhum horário disponível.";
+}
 }
 alert("Calendário conectado com sucesso!");
 campoData.addEventListener("change", consultarHorarios);
