@@ -159,7 +159,29 @@ if (error) {
           .padStart(2, "0");
         const m = String(minutos % 60).padStart(2, "0");
         const hora = `${h}:${m}`;
-        horario.add(new Option(hora, hora));
+        const inicioSlot = new Date(
+  `${data.value}T${hora}:00-03:00`
+);
+
+const fimSlot = new Date(
+  inicioSlot.getTime() + duracao * 60000
+);
+
+const ocupado = (agendamentos || []).some(item => {
+  if (item.status === "cancelado") return false;
+
+  const inicioAgendado = new Date(item.inicio);
+  const fimAgendado = new Date(item.fim);
+
+  return (
+    inicioSlot < fimAgendado &&
+    fimSlot > inicioAgendado
+  );
+});
+
+if (!ocupado) {
+  horario.add(new Option(hora, hora));
+}
       }
     }
 
