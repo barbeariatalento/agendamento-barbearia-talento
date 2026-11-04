@@ -99,7 +99,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   }
 
   campo.innerHTML = '<option value="">Selecione</option>';
-
+alert("Profissionais encontrados: " + data.length);
   data.forEach(p => {
     campo.add(new Option(p.nome, p.id));
   });
