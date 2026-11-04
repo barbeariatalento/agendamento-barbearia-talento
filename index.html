@@ -122,6 +122,22 @@ carregarProfissionais();
 
       if (!data.value || !profissional.value || !servico.value)
         return;
+  const inicioDia = `${data.value}T00:00:00-03:00`;
+const fimDia = `${data.value}T23:59:59-03:00`;
+
+const { data: agendamentos, error } = await db
+  .from("agendamentos")
+  .select("inicio, fim, status")
+  .eq("profissional_id", profissional.value)
+  .gte("inicio", inicioDia)
+  .lte("inicio", fimDia);
+
+if (error) {
+  console.error(error);
+  horario.innerHTML =
+    '<option value="">Erro ao consultar horários</option>';
+  return;
+}
 
       const diaSemana =
         new Date(data.value + "T12:00:00").getDay();
