@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barbearia Talento - Agendamento</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px 15px;
+    }
+    .container {
+      max-width: 420px;
+      margin: auto;
+    }
+    h1 { color: #e62929; }
+    select, input, button {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      box-sizing: border-box;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background: #d71920;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 12px;
+    }
+    #mensagem { margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BARBEARIA TALENTO</h1>
+    <h2>Agende seu horário</h2>
+
+    <form id="agenda">
+      <input id="nome" placeholder="Seu nome" required>
+      <input id="telefone" placeholder="WhatsApp" required>
+
+      <label>Escolha o profissional</label>
+      <select id="profissional" required>
+        <option value="">Selecione</option>
+        <option>Luis</option>
+        <option>Gustavo</option>
+        <option>Carol</option>
+        <option>Juninho</option>
+      </select>
+
+      <label>Escolha o serviço</label>
+      <select id="servico" required>
+        <option value="">Selecione</option>
+        <option value="40">Corte - 40 minutos</option>
+        <option value="40">Barba - 40 minutos</option>
+        <option value="60">Cabelo e barba - 60 minutos</option>
+        <option value="30">Outros serviços - 30 minutos</option>
+      </select>
+
+      <label>Escolha a data</label>
+      <input type="date" id="data" required>
+
+      <label>Escolha o horário</label>
+      <select id="horario" required>
+        <option value="">Selecione o horário</option>
+      </select>
+
+      <button type="submit">Continuar agendamento</button>
+    </form>
+    <p id="mensagem"></p>
+  </div>
+
+  <script>
+    const data = document.getElementById("data");
+    const horario = document.getElementById("horario");
+    const profissional = document.getElementById("profissional");
+    const servico = document.getElementById("servico");
+
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth()+1).padStart(2,"0");
+    const dia = String(hoje.getDate()).padStart(2,"0");
+    data.min = `${ano}-${mes}-${dia}`;
+
+    function atualizarHorarios() {
+      horario.innerHTML =
+        '<option value="">Selecione o horário</option>';
+
+      if (!data.value || !profissional.value || !servico.value)
+        return;
+
+      const diaSemana =
+        new Date(data.value + "T12:00:00").getDay();
+
+      if (diaSemana === 0 || diaSemana === 1) {
+        horario.innerHTML =
+          '<option value="">Fechado neste dia</option>';
+        return;
+      }
+
+      const abertura = diaSemana === 6 ? 8 : 9;
+      const fechamento = diaSemana === 6 ? 18 : 20;
+      const duracao = Number(servico.value);
+
+      for (let minutos = abertura * 60;
+           minutos + duracao <= fechamento * 60;
+           minutos += 10) {
+        const h = String(Math.floor(minutos / 60))
+          .padStart(2, "0");
+        const m = String(minutos % 60).padStart(2, "0");
+        const hora = `${h}:${m}`;
+        horario.add(new Option(hora, hora));
+      }
+    }
+
+    data.addEventListener("change", atualizarHorarios);
+    profissional.addEventListener("change", atualizarHorarios);
+    servico.addEventListener("change", atualizarHorarios);
+
+    document.getElementById("agenda")
+      .addEventListener("submit", function(event) {
+        event.preventDefault();
+        document.getElementById("mensagem").textContent =
+          "Tela inicial pronta! A confirmação será ativada após conectar o Supabase.";
+      });
+  </script>
+</body>
+</html>
