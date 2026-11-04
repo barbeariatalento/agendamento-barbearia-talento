@@ -86,7 +86,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const campo = document.getElementById("profissional");
 
   const { data, error } = await db
-    .from("Profissionais")
+    .from("profissionais")
     .select("id, nome")
     .eq("ativo", true)
     .order("nome");
