@@ -53,10 +53,7 @@
       <label>Escolha o profissional</label>
       <select id="profissional" required>
         <option value="">Selecione</option>
-        <option>Luis</option>
-        <option>Gustavo</option>
-        <option>Carol</option>
-        <option>Juninho</option>
+        
       </select>
 
       <label>Escolha o serviço</label>
@@ -85,6 +82,29 @@
     const SUPABASE_URL = "https://urfeqeoqkpgzuyul klnk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    async function carregarProfissionais() {
+  const campo = document.getElementById("profissional");
+
+  const { data, error } = await db
+    .from("profissionais")
+    .select("id, nome")
+    .eq("ativo", true)
+    .order("nome");
+
+  if (error) {
+    console.error(error);
+    campo.options[0].textContent = "Erro ao carregar profissionais";
+    return;
+  }
+
+  campo.innerHTML = '<option value="">Selecione</option>';
+
+  data.forEach(p => {
+    campo.add(new Option(p.nome, p.id));
+  });
+}
+
+carregarProfissionais();
     const data = document.getElementById("data");
     const horario = document.getElementById("horario");
     const profissional = document.getElementById("profissional");
