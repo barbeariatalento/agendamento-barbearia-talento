@@ -119,6 +119,47 @@ function abrirAgenda() {
   document.getElementById("telaAgenda").style.display = "block";
   
 }
+  
+document.getElementById("profissional").addEventListener("change", async function () {
+  const lista = document.getElementById("listaHorarios");
+  const profissional = this.value;
+
+  if (!profissional) {
+    lista.textContent = "Escolha um profissional.";
+    return;
+  }
+
+  lista.textContent = "Buscando agendamentos...";
+
+  const { data, error } = await db
+    .from("agendamentos")
+    .select("cliente_nome, inicio, status, profissional_id")
+    .eq("profissional_id", profissional)
+    .order("inicio", { ascending: true });
+
+  if (error) {
+    lista.textContent = "Erro ao consultar: " + error.message;
+    return;
+  }
+
+  lista.replaceChildren();
+
+  if (!data.length) {
+    lista.textContent = "Nenhum agendamento encontrado.";
+    return;
+  }
+
+  data.forEach(item => {
+    const linha = document.createElement("p");
+    const horario = new Date(item.inicio).toLocaleString("pt-BR", {
+      timeZone: "America/Sao_Paulo"
+    });
+
+    linha.textContent = `${horario} - ${item.cliente_nome} - ${item.status}`;
+    lista.appendChild(linha);
+  });
+});
+
 </script>
 </body>
 </html>
