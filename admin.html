@@ -16,6 +16,59 @@
     font-size: 10px;
   }
 }
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 6px;
+  }
+
+  .panel {
+    padding: 6px;
+  }
+
+  .schedule-scroll {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .schedule {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 28px repeat(4, minmax(0, 1fr));
+  }
+
+  .headcell {
+    padding: 8px 1px;
+    font-size: 10px;
+    overflow: hidden;
+  }
+
+  .time-label {
+    right: 2px;
+    font-size: 8px;
+  }
+
+  .booking {
+    left: 1px;
+    right: 1px;
+    padding: 3px 2px;
+    border-left-width: 2px;
+    font-size: 8px;
+  }
+
+  .booking strong {
+    font-size: 9px;
+    overflow-wrap: anywhere;
+  }
+
+  .booking small {
+    font-size: 7px;
+  }
+}
 </style></head><body>
 <div id="loginWrap" class="login-wrap"><div class="login-card"><div class="logo">✂ BARBEARIA <span>TALENTO</span></div><p class="muted">Acesso administrativo</p><form id="loginForm"><div><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required></div><div><label for="senha">Senha</label><input id="senha" type="password" autocomplete="current-password" required></div><button class="btn" type="submit">Entrar no painel</button></form><p id="loginMsg" class="error" role="alert"></p></div></div>
 <div id="app" class="app"><aside class="sidebar"><div class="logo">✂ <span>TALENTO</span></div><nav class="nav" aria-label="Menu"><button data-view="inicio">⌂ &nbsp; Início</button><button data-view="agenda" class="active">▦ &nbsp; Agenda</button><button data-view="profissionais">♟ &nbsp; Profissionais</button><button data-view="clientes">♧ &nbsp; Clientes</button><button data-view="caixa">▣ &nbsp; Caixa</button><button data-view="relatorios">▥ &nbsp; Relatórios</button><button data-view="lembretes">♧ &nbsp; Lembretes</button><button data-view="gestao">▤ &nbsp; Gestão da agenda</button><button data-view="pacotes">▣ &nbsp; Pacotes de clientes</button><button data-view="produtos">▧ &nbsp; Produtos</button><button data-view="financeiro">＄ &nbsp; Financeiro</button><button data-view="comissoes">% &nbsp; Comissões</button><button data-view="desempenho">▥ &nbsp; Desempenho da equipe</button></nav><div class="sidefoot"><p class="muted" style="font-size:12px">Administrador</p><button id="sair" class="btn alt" style="width:100%">Sair</button></div></aside><main class="content"><header class="top"><div><h1 id="pageTitle">Agenda</h1><p class="muted">Barbearia Talento • Gestão de agendamentos</p></div><div class="actions"><button class="btn alt" id="refresh">↻ Atualizar</button><button class="btn" id="novo">+ Novo agendamento</button></div></header><p id="status" class="notice" role="status"></p>
