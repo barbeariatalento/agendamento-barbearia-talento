@@ -189,11 +189,53 @@ if (!ocupado) {
     profissional.addEventListener("change", atualizarHorarios);
     servico.addEventListener("change", atualizarHorarios);
 
-    document.getElementById("agenda")
-      .addEventListener("submit", function(event) {
-        event.preventDefault();
-        document.getElementById("mensagem").textContent =
-          "Tela inicial pronta! A confirmação será ativada após conectar o Supabase.";
+  
+document.getElementById("agenda")
+  .addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const mensagem = document.getElementById("mensagem");
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const profissionalId = profissional.value;
+    const horaEscolhida = horario.value;
+    const duracao = Number(servico.value);
+
+    if (!nome || !telefone || !profissionalId ||
+        !data.value || !horaEscolhida || !duracao) {
+      mensagem.textContent = "Preencha todos os campos.";
+      return;
+    }
+
+    const inicio = new Date(
+      `${data.value}T${horaEscolhida}:00-03:00`
+    );
+    const fim = new Date(inicio.getTime() + duracao * 60000);
+
+    mensagem.textContent = "Salvando agendamento...";
+
+    const { error } = await db
+      .from("agendamentos")
+      .insert({
+        cliente_nome: nome,
+        cliente_telefone: telefone,
+        profissional_id: profissionalId,
+        inicio: inicio.toISOString(),
+        fim: fim.toISOString(),
+        status: "Confirmado"
+      });
+
+    if (error) {
+      console.error(error);
+      mensagem.textContent =
+        "Não foi possível agendar. Verifique se o horário está livre.";
+      return;
+    }
+
+    mensagem.textContent = "Agendamento confirmado com sucesso!";
+    await atualizarHorarios();
+  });
+
       });
   </script>
 </body>
