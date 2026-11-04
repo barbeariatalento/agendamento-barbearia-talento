@@ -87,7 +87,7 @@ input { border: 1px solid #ccc; }
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 async function carregarProfissionais() {
   const { data, error } = await db
-    .from("Profissionais")
+   .from("profissionais")
     .select("id, nome")
     .eq("ativo", true)
     .order("nome");
