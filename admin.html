@@ -60,7 +60,7 @@ input { border: 1px solid #ccc; }
   <h2>Painel Administrativo</h2>
   <p>Bem-vindo à Barbearia Talento!</p>
 
-  <button type="button">Agenda</button>
+ <button type="button" onclick="abrirAgenda()">Agenda</button>
   <button type="button">Profissionais</button>
   <button type="button">Clientes</button>
   <button type="button">Caixa</button>
@@ -99,6 +99,10 @@ input { border: 1px solid #ccc; }
 document.getElementById("painel").style.display = "block";
   });
 </script>
-
+<script>
+function abrirAgenda() {
+  alert("Agenda da Barbearia Talento aberta!");
+}
+</script>
 </body>
 </html>
