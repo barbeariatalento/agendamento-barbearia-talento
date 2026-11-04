@@ -226,7 +226,7 @@ document.getElementById("agenda")
         inicio: inicio.toISOString(),
         fim: fim.toISOString(),
         status: "Confirmado"
-      });
+    }, { returning: "minimal" });
 
     if (error) {
       console.error(error);
