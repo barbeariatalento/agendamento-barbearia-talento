@@ -82,7 +82,15 @@ input { border: 1px solid #ccc; }
 
   <label>Escolha o dia:</label>
   <input type="date" id="dataAgenda">
+<label for="servicoAgenda">Escolha o serviço:</label>
 
+<select id="servicoAgenda">
+  <option value="">Selecione o serviço</option>
+  <option value="40">Corte - 40 minutos</option>
+  <option value="40">Barba - 40 minutos</option>
+  <option value="60">Cabelo e barba - 60 minutos</option>
+  <option value="30">Outros serviços - 30 minutos</option>
+</select>
   <h3>Horários disponíveis</h3>
   <div id="horariosDisponiveis">
     Selecione uma data para consultar.
