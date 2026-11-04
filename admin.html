@@ -193,5 +193,57 @@ document.getElementById("profissional").addEventListener("change", async functio
 });
 
 </script>
+  <script>
+const campoData = document.getElementById("dataAgenda");
+const campoProfissional = document.getElementById("profissional");
+const horarios = document.getElementById("horariosDisponiveis");
+
+async function consultarHorarios() {
+  const data = campoData.value;
+  const profissional = campoProfissional.value;
+
+  if (!data || !profissional) {
+    horarios.textContent = "Escolha o profissional e a data.";
+    return;
+  }
+
+  horarios.textContent = "Consultando horários...";
+
+  const inicio = `${data}T00:00:00-03:00`;
+  const fim = `${data}T23:59:59-03:00`;
+
+  const { data: agendamentos, error } = await db
+    .from("agendamentos")
+    .select("inicio, fim, status")
+    .eq("profissional_id", profissional)
+    .gte("inicio", inicio)
+    .lte("inicio", fim);
+
+  if (error) {
+    horarios.textContent = "Erro: " + error.message;
+    return;
+  }
+
+  horarios.replaceChildren();
+
+  agendamentos.forEach(item => {
+    const linha = document.createElement("p");
+    const hora = new Date(item.inicio).toLocaleTimeString(
+      "pt-BR",
+      { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }
+    );
+
+    linha.textContent = `${hora} - ${item.status}`;
+    horarios.appendChild(linha);
+  });
+
+  if (!agendamentos.length) {
+    horarios.textContent = "Nenhum agendamento encontrado nesta data.";
+  }
+}
+
+campoData.addEventListener("change", consultarHorarios);
+campoProfissional.addEventListener("change", consultarHorarios);
+</script>
 </body>
 </html>
