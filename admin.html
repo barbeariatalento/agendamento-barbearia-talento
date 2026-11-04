@@ -252,6 +252,26 @@ async function consultarHorarios() {
 alert("Calendário conectado com sucesso!");
 campoData.addEventListener("change", consultarHorarios);
 campoProfissional.addEventListener("change", consultarHorarios);
+    const campoServico = document.getElementById("servicoAgenda");
+
+campoServico.addEventListener("change", consultarHorarios);
+
+function calcularHorarios(inicio, fim, duracao) {
+  const horarios = [];
+
+  for (
+    let minuto = inicio;
+    minuto + duracao <= fim;
+    minuto += duracao
+  ) {
+    const hora = String(Math.floor(minuto / 60)).padStart(2, "0");
+    const min = String(minuto % 60).padStart(2, "0");
+
+    horarios.push(`${hora}:${min}`);
+  }
+
+  return horarios;
+}
 </script>
 </body>
 </html>
