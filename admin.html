@@ -70,13 +70,9 @@ input { border: 1px solid #ccc; }
   <h2>Agenda - Barbearia Talento</h2>
 
   <label>Escolha o profissional:</label>
-  <select id="profissional">
-    <option value="">Selecione</option>
-    <option value="Luis">Luis</option>
-    <option value="Gustavo">Gustavo</option>
-    <option value="Carol">Carol</option>
-    <option value="Juninho">Juninho</option>
-  </select>
+<select id="profissional">
+  <option value="">Selecione</option>
+</select>
 
   <h3>Agendamentos</h3>
   <p>Selecione um profissional para consultar os horários.</p>
@@ -89,7 +85,31 @@ input { border: 1px solid #ccc; }
   const SUPABASE_KEY = "sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD";
 
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function carregarProfissionais() {
+  const { data, error } = await db
+    .from("Profissionais")
+    .select("id, nome")
+    .eq("ativo", true)
+    .order("nome");
 
+  const select = document.getElementById("profissional");
+
+  if (error) {
+    alert("Erro ao carregar profissionais: " + error.message);
+    return;
+  }
+
+  select.innerHTML = '<option value="">Selecione</option>';
+
+  data.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p.id;
+    option.textContent = p.nome;
+    select.appendChild(option);
+  });
+}
+
+carregarProfissionais();
   document.getElementById("login").addEventListener("submit", async function(e) {
     e.preventDefault();
 
