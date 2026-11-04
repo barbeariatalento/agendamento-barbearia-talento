@@ -56,14 +56,35 @@ input { border: 1px solid #ccc; }
 </form>
 <p id="mensagem"></p>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-document.getElementById("login")
-.addEventListener("submit", function(e) {
-  e.preventDefault();
-  document.getElementById("mensagem")
-    .textContent =
-    "Tela criada! A conexão segura será configurada.";
-});
+  const SUPABASE_URL = "https://urfeqeoqkpgzuyul klnk.supabase.co".replace(" ", "");
+  const SUPABASE_KEY = "sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD";
+
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  document.getElementById("login").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("senha").value;
+    const mensagem = document.getElementById("mensagem");
+
+    mensagem.textContent = "Verificando acesso...";
+
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      mensagem.textContent = "Não foi possível entrar. Confira e-mail e senha.";
+      return;
+    }
+
+    mensagem.textContent = "Login realizado! Preparando painel administrativo.";
+  });
 </script>
+
 </body>
 </html>
