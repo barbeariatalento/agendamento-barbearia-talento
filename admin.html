@@ -134,9 +134,9 @@ $('serviceForm').addEventListener('submit',async e=>{
  const values={nome,duracao_minutos:duracao};if(servicePriceColumn){const price=$('servicePrice').value;if(price!=='')values[servicePriceColumn]=Number(price)}
  else if(!editingService)values.ativo=true;
  const btn=$('serviceSave');btn.disabled=true;$('serviceMessage').textContent='Salvando no Supabase...';
- const result=editingService?await db.from('servicos')).update(values).eq('id',editingService).select('id'):await db.from('servicos').insert(values).select('id');
+ const result=editingService?await db.from('servicos').update(values).eq('id',editingService).select('id'):await db.from('servicos').insert(values).select('id');
  btn.disabled=false;
- if(result.error){$('serviceMessage').textContent='Não foi possível salvar: '+result.error.message+' (verifique as permissões da tabela Servicos).';return}
+ if(result.error){$('serviceMessage').textContent='Não foi possível salvar: '+result.error.message+' (verifique as permissões da tabela servicos).';return}
  if(!result.data?.length){$('serviceMessage').textContent='O Supabase não confirmou a gravação. Verifique as permissões de edição.';return}
  resetServiceForm();await loadBase();$('serviceMessage').textContent='Serviço salvo com sucesso!';
 });
