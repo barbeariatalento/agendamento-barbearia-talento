@@ -115,7 +115,7 @@ async function loadServicesAdmin(){
  const candidate=['preco','preco_base','valor','valor_padrao'];
  servicePriceColumn=candidate.find(k=>serviceAdminRows.some(r=>Object.prototype.hasOwnProperty.call(r,k)))||null;
  $('servicePrice').disabled=!servicePriceColumn;
- info.textContent=servicePriceColumn?'Preços, serviços e duração são gravados no Supabase.':'Nome e duração podem ser editados. Para ativar os preços, precisamos criar a coluna preco na tabela Servicos do Supabase.';
+ info.textContent=servicePriceColumn?'Preços, serviços e duração são gravados no Supabase.':'Nome e duração podem ser editados. Para ativar os preços, precisamos criar a coluna preco na tabela servicos do Supabase.';
  for(const item of serviceAdminRows){
   const row=document.createElement('div');row.className='service-row';
   const details=document.createElement('div');const title=document.createElement('strong');title.textContent=item.nome||'Serviço';
