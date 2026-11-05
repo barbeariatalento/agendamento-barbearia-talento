@@ -77,7 +77,7 @@ async function checkAdmin(){const {data:{user},error}=await db.auth.getUser();if
 async function enter(){if(!await checkAdmin()){await db.auth.signOut();$('loginMsg').textContent ||= 'Esta conta não está autorizada como administradora.';return} $('loginWrap').style.display='none';$('app').style.display='block';state.date=today();$('dataAgenda').value=state.date;await loadBase();await loadAgenda();}
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginMsg').textContent='Verificando acesso...';const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('senha').value});if(error){$('loginMsg').textContent='Não foi possível entrar. Confira seu e-mail e senha.';return}$('loginMsg').textContent='';await enter()});
 $('sair').addEventListener('click',async()=>{await db.auth.signOut();location.reload()});
-async function loadBase(){const [p,s]=await Promise.all([db.from('profissionais').select('id,nome,ativo').eq('ativo',true).order('nome'),db.from('Servicos').select('id,nome,duracao_minutos,ativo').eq('ativo',true).order('nome')]);if(p.error)setStatus('Erro ao carregar profissionais: '+p.error.message,true);else state.professionals=p.data||[];if(s.error)setStatus('Não foi possível carregar serviços: '+s.error.message,true);else state.services=s.data||[];renderProfessionals();fillSelects();fillComissoes();await loadServicesAdmin()}
+async function loadBase(){const [p,s]=await Promise.all([db.from('profissionais').select('id,nome,ativo').eq('ativo',true).order('nome'),db.from('servicos').select('id,nome,duracao_minutos,ativo').eq('ativo',true).order('nome')]);if(p.error)setStatus('Erro ao carregar profissionais: '+p.error.message,true);else state.professionals=p.data||[];if(s.error)setStatus('Não foi possível carregar serviços: '+s.error.message,true);else state.services=s.data||[];renderProfessionals();fillSelects();fillComissoes();await loadServicesAdmin()}
 function fillSelects(){const prof=$('bookingProf'),serv=$('bookingServico');prof.replaceChildren(new Option('Selecione',''));serv.replaceChildren(new Option('Selecione',''));state.professionals.forEach(p=>prof.add(new Option(p.nome,p.id)));state.services.forEach(s=>serv.add(new Option(`${s.nome} • ${s.duracao_minutos} min`,s.id)))}
 function renderProfessionals(){const c=$('profCards');c.replaceChildren();state.professionals.forEach(p=>{const el=document.createElement('div');el.className='person';const b=document.createElement('b');b.textContent=p.nome;const sub=document.createElement('div');sub.className='pill';sub.textContent='Ativo';el.append(b,document.createElement('br'),sub);c.append(el)})}
 function fillComissoes(){const el=$('comProf');el.replaceChildren();state.professionals.forEach(p=>el.add(new Option(p.nome,p.id)));calcComissoes()}
@@ -108,7 +108,7 @@ $('bookingForm').addEventListener('submit',async e=>{e.preventDefault();const s=
 
 let editingService=null, servicePriceColumn=null, serviceAdminRows=[];
 async function loadServicesAdmin(){
- const {data,error}=await db.from('Servicos').select('*').order('nome');
+ const {data,error}=await db.from('servicos').select('*').order('nome');
  const info=$('serviceInfo'),list=$('serviceList');list.replaceChildren();
  if(error){$('serviceMessage').textContent='Erro ao consultar serviços: '+error.message;return}
  serviceAdminRows=data||[];
@@ -134,7 +134,7 @@ $('serviceForm').addEventListener('submit',async e=>{
  const values={nome,duracao_minutos:duracao};if(servicePriceColumn){const price=$('servicePrice').value;if(price!=='')values[servicePriceColumn]=Number(price)}
  else if(!editingService)values.ativo=true;
  const btn=$('serviceSave');btn.disabled=true;$('serviceMessage').textContent='Salvando no Supabase...';
- const result=editingService?await db.from('Servicos').update(values).eq('id',editingService).select('id'):await db.from('Servicos').insert(values).select('id');
+ const result=editingService?await db.from('servicos')).update(values).eq('id',editingService).select('id'):await db.from('servicos').insert(values).select('id');
  btn.disabled=false;
  if(result.error){$('serviceMessage').textContent='Não foi possível salvar: '+result.error.message+' (verifique as permissões da tabela Servicos).';return}
  if(!result.data?.length){$('serviceMessage').textContent='O Supabase não confirmou a gravação. Verifique as permissões de edição.';return}
