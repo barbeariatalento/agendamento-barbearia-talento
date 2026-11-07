@@ -1,18 +1,677 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Talento | Portal do Colaborador</title><style>
-:root{font-family:Inter,Arial,sans-serif;color-scheme:dark;--bg:#090d16;--card:#131e30;--line:#293b54;--red:#e0293b;--text:#f5f8ff;--muted:#a8b7ce}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}button,input{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:12px 17px;background:var(--red);color:white;font-weight:700}button.secondary{background:#283b55}button:disabled{opacity:.55}input{width:100%;padding:13px;border-radius:10px;border:1px solid #3b4e66;background:#0c1421;color:white}.shell{max-width:1150px;margin:auto;padding:22px}.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.brand{font-size:22px;font-weight:900}.brand span{color:var(--red)}.sub{color:var(--muted);font-size:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}.login{max-width:430px;margin:9vh auto}.login form{display:grid;gap:14px}.login label{font-size:13px;color:var(--muted)}h1{font-size:25px;margin:0 0 6px}h2{font-size:18px;margin:0 0 15px}.error{color:#ff9ca4;white-space:pre-wrap}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.kpi{background:#1b2b42;border-radius:12px;padding:17px}.kpi strong{display:block;font-size:26px;margin-top:6px}.tabs{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.tabs button{background:#24344d}.tabs button.active{background:var(--red)}.appt{padding:16px;border:1px solid var(--line);border-radius:12px;background:#19283d;margin-bottom:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.appt b{display:block;font-size:17px}.appt small{color:var(--muted)}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.date{width:auto}.empty{color:var(--muted);padding:14px}.status{color:#a5edc8;font-size:13px}#portal{display:none}@media(max-width:650px){.shell{padding:12px}.kpis{grid-template-columns:1fr 1fr}.kpi{padding:12px}.kpi strong{font-size:21px}.header h1{font-size:20px}}
-</style></head><body><section id="login" class="login card"><div class="brand">✂ BARBEARIA <span>TALENTO</span></div><p class="sub">Acesso exclusivo para colaboradores</p><form id="loginForm"><div><label>E-mail</label><input type="email" id="email" autocomplete="username" required></div><div><label>Senha</label><input type="password" id="password" autocomplete="current-password" required></div><button id="loginButton">Entrar na minha agenda</button></form><p id="loginMessage" class="error" role="alert"></p></section>
-<div id="portal" class="shell"><header class="header"><div><div class="brand">✂ <span>TALENTO</span></div><h1 id="greeting">Minha área</h1><div class="sub">Portal do colaborador</div></div><button id="logout" class="secondary">Sair</button></header><div class="tabs"><button class="active" data-tab="agenda">Minha agenda</button><button data-tab="resumo">Meu desempenho</button></div><section id="agendaView"><div class="card"><div class="row"><button class="secondary" id="prev">❮</button><input class="date" type="date" id="date"><button class="secondary" id="next">❯</button><button class="secondary" id="today">Hoje</button><button class="secondary" id="refresh">Atualizar</button></div><p id="status" class="status"></p></div><div class="kpis" id="kpis"></div><div class="card" style="margin-top:16px"><h2>Atendimentos do dia</h2><div id="bookings"></div></div></section><section id="resumoView" style="display:none"><div class="card"><h2>Meu desempenho</h2><p class="sub">Resumo dos agendamentos do dia selecionado. Valores financeiros e comissões só serão exibidos após a configuração segura das permissões do Caixa.</p><div id="performance"></div></div></section></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Barbearia Talento | Portal do Colaborador</title>
+
+<style>
+:root {
+  font-family: Arial, sans-serif;
+  color-scheme: dark;
+  --bg: #090d16;
+  --card: #131e30;
+  --line: #293b54;
+  --red: #e0293b;
+  --text: #f5f8ff;
+  --muted: #a8b7ce;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button, input { font: inherit; }
+
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 17px;
+  background: var(--red);
+  color: white;
+  font-weight: bold;
+}
+
+button.secondary { background: #283b55; }
+button:disabled { opacity: 0.5; }
+
+input {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid #3b4e66;
+  background: #0c1421;
+  color: white;
+}
+
+.shell {
+  max-width: 1150px;
+  margin: auto;
+  padding: 22px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.brand span { color: var(--red); }
+
+.sub {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.login {
+  max-width: 430px;
+  margin: 9vh auto;
+}
+
+.login form {
+  display: grid;
+  gap: 14px;
+}
+
+.login label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+h1 { font-size: 25px; }
+h2 { font-size: 18px; }
+
+.error {
+  color: #ff9ca4;
+  white-space: pre-wrap;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.kpi {
+  background: #1b2b42;
+  border-radius: 12px;
+  padding: 17px;
+}
+
+.kpi strong {
+  display: block;
+  font-size: 26px;
+  margin-top: 6px;
+}
+
+.tabs {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.tabs button { background: #24344d; }
+.tabs button.active { background: var(--red); }
+
+.appt {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #19283d;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.appt b {
+  display: block;
+  font-size: 17px;
+}
+
+.appt small { color: var(--muted); }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.date { width: auto; }
+
+.empty {
+  color: var(--muted);
+  padding: 14px;
+}
+
+.status {
+  color: #a5edc8;
+  font-size: 13px;
+}
+
+#portal { display: none; }
+
+@media (max-width: 650px) {
+  .shell { padding: 12px; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .kpi { padding: 12px; }
+  .kpi strong { font-size: 21px; }
+}
+</style>
+</head>
+
+<body>
+
+<section id="login" class="login card">
+  <div class="brand">
+    ✂ BARBEARIA <span>TALENTO</span>
+  </div>
+
+  <p class="sub">Acesso exclusivo para colaboradores</p>
+
+  <form id="loginForm">
+    <div>
+      <label for="email">E-mail</label>
+      <input type="email" id="email" required autocomplete="username">
+    </div>
+
+    <div>
+      <label for="password">Senha</label>
+      <input type="password" id="password" required autocomplete="current-password">
+    </div>
+
+    <button type="submit" id="loginButton">
+      Entrar na minha agenda
+    </button>
+  </form>
+
+  <p id="loginMessage" class="error" role="alert"></p>
+</section>
+
+<div id="portal" class="shell">
+
+  <header class="header">
+    <div>
+      <div class="brand">✂ <span>TALENTO</span></div>
+      <h1 id="greeting">Minha área</h1>
+      <div class="sub">Portal do colaborador</div>
+    </div>
+
+    <button id="logout" class="secondary">Sair</button>
+  </header>
+
+  <div class="tabs">
+    <button class="active" data-tab="agenda">Minha agenda</button>
+    <button data-tab="resumo">Meu desempenho</button>
+  </div>
+
+  <section id="agendaView">
+
+    <div class="card">
+      <div class="row">
+        <button class="secondary" id="prev">❮</button>
+        <input class="date" type="date" id="date">
+        <button class="secondary" id="next">❯</button>
+        <button class="secondary" id="today">Hoje</button>
+        <button class="secondary" id="refresh">Atualizar</button>
+      </div>
+
+      <p id="status" class="status"></p>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Atendimentos do dia</h2>
+      <div id="bookings"></div>
+    </div>
+
+  </section>
+
+  <section id="resumoView" style="display:none">
+    <div class="card">
+      <h2>Meu desempenho</h2>
+      <p class="sub">
+        Resumo dos agendamentos do dia selecionado.
+        As comissões serão configuradas posteriormente.
+      </p>
+      <div id="performance"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
 'use strict';
-const URL='https://urfeqeoqkpgzuyulklnk.supabase.co';
-const KEY='sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD';
-const db=supabase.createClient(URL,KEY);
-const $=id=>document.getElementById(id);const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const today=()=>fmt(new Date());let professional=null,bookings=[],services=[];
-function time(iso){return new Date(iso).toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false})}
-function cancelled(v){return String(v||'').toLowerCase().startsWith('cancel')}
-function message(s,err=false){$('status').textContent=s;$('status').style.color=err?'#ff9ca4':'#a5edc8'}
-async function init(){const {data:{user}}=await db.auth.getUser();if(!user){$('login').style.display='block';$('portal').style.display='none';return}const {data:link,error}=await db.from('colaboradores_acessos').select('profissional_id').eq('usuario_id',user.id).maybeSingle();if(error||!link){$('loginMessage').textContent=error?'Não foi possível validar o acesso: '+error.message:'Sua conta ainda não está vinculada a um profissional. Peça ao administrador para liberar o acesso.';await db.auth.signOut();return}const {data:p,error:pe}=await db.from('profissionais').select('id,nome').eq('id',link.profissional_id).single();if(pe||!p){$('loginMessage').textContent='Não foi possível carregar seu cadastro.';return}professional=p;$('greeting').textContent='Olá, '+p.nome;$('login').style.display='none';$('portal').style.display='block';$('date').value=today();await load()}
-async function load(){if(!professional)return;message('Carregando...');const date=$('date').value;const [r,s]=await Promise.all([db.from('agendamentos').select('id,cliente_nome,cliente_telefone,profissional_id,servico_id,inicio,fim,status').eq('profissional_id',professional.id).gte('inicio',date+'T00:00:00-03:00').lt('inicio',date+'T23:59:59.999-03:00').order('inicio'),db.from('servicos').select('id,nome')]);if(r.error){message('Não foi possível consultar sua agenda: '+r.error.message,true);return}bookings=r.data||[];services=s.data||[];render();message('Agenda atualizada.')}
-function render(){const list=$('bookings');list.replaceChildren();const active=bookings.filter(x=>!cancelled(x.status));const totalMinutes=active.reduce((n,x)=>n+(new Date(x.fim)-new Date(x.inicio))/60000,0);$('kpis').replaceChildren();for(const [label,value] of [['Agendamentos',active.length],['Cancelados',bookings.length-active.length],['Minutos agendados',totalMinutes]]){const c=document.createElement('div');c.className='kpi';const l=document.createElement('div');l.className='sub';l.textContent=label;const v=document.createElement('strong');v.textContent=value;c.append(l,v);$('kpis').append(c)}if(!bookings.length){const p=document.createElement('p');p.className='empty';p.textContent='Nenhum atendimento nesta data.';list.append(p)}for(const b of bookings){const c=document.createElement('div');c.className='appt';const a=document.createElement('div');const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';const svc=services.find(x=>String(x.id)===String(b.servico_id));const detail=document.createElement('small');detail.textContent=`${time(b.inicio)}–${time(b.fim)} • ${svc?.nome||'Serviço'} • ${b.status||'Agendado'}`;a.append(name,detail);const phone=document.createElement('span');phone.className='sub';phone.textContent=b.cliente_telefone||'';c.append(a,phone);list.append(c)}$('performance').textContent=`${active.length} agendamento(s) ativo(s) e ${totalMinutes} minuto(s) de atendimento programado(s) para ${$('date').value}.`}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginButton').disabled=true;$('loginMessage').textContent='Entrando...';const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});$('loginButton').disabled=false;if(error){$('loginMessage').textContent='E-mail ou senha inválidos.';return}$('loginMessage').textContent='';await init()});$('logout').onclick=async()=>{await db.auth.signOut();location.reload()};$('date').onchange=load;$('refresh').onclick=load;$('today').onclick=()=>{$('date').value=today();load()};function move(n){const d=new Date($('date').value+'T12:00:00');d.setDate(d.getDate()+n);$('date').value=fmt(d);load()}$('prev').onclick=()=>move(-1);$('next').onclick=()=>move(1);document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));$('agendaView').style.display=b.dataset.tab==='agenda'?'block':'none';$('resumoView').style.display=b.dataset.tab==='resumo'?'block':'none'});init();
-</script></body></html>
+
+// CONFIGURAÇÃO SUPABASE
+const SUPABASE_URL =
+  'https://urfeqeoqkpgzuyulklnk.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD';
+
+let db = null;
+let professional = null;
+let bookings = [];
+let services = [];
+
+const $ = id => document.getElementById(id);
+
+function showLoginError(text) {
+  $('loginMessage').textContent = text;
+  $('login').style.display = 'block';
+  $('portal').style.display = 'none';
+}
+
+function showPortal() {
+  $('login').style.display = 'none';
+  $('portal').style.display = 'block';
+}
+
+function localDate() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+}
+
+function fmt(d) {
+  return (
+    d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0')
+  );
+}
+
+function time(iso) {
+  return new Date(iso).toLocaleTimeString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+}
+
+function cancelled(value) {
+  return String(value || '')
+    .toLowerCase()
+    .startsWith('cancel');
+}
+
+function message(text, error = false) {
+  $('status').textContent = text;
+  $('status').style.color = error ? '#ff9ca4' : '#a5edc8';
+}
+
+function readableError(error) {
+  return error?.message || 'Erro desconhecido.';
+}
+
+// INICIALIZAR SUPABASE
+function connectSupabase() {
+  if (!window.supabase || !window.supabase.createClient) {
+    throw new Error(
+      'A biblioteca do Supabase não carregou. Verifique sua internet.'
+    );
+  }
+
+  db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+}
+
+// VERIFICAR COLABORADOR
+async function init() {
+  try {
+    const { data, error: authError } = await db.auth.getUser();
+
+    if (authError || !data?.user) {
+      showLoginError('');
+      return;
+    }
+
+    const user = data.user;
+
+    const { data: link, error: linkError } = await db
+      .from('colaboradores_acessos')
+      .select('profissional_id')
+      .eq('usuario_id', user.id)
+      .maybeSingle();
+
+    if (linkError) {
+      showLoginError(
+        'Erro ao verificar vínculo: ' + readableError(linkError)
+      );
+      return;
+    }
+
+    if (!link) {
+      showLoginError(
+        'Sua conta ainda não está vinculada a um profissional.'
+      );
+      return;
+    }
+
+    const { data: p, error: professionalError } = await db
+      .from('profissionais')
+      .select('id,nome')
+      .eq('id', link.profissional_id)
+      .single();
+
+    if (professionalError || !p) {
+      showLoginError(
+        'Não foi possível carregar o profissional: ' +
+        readableError(professionalError)
+      );
+      return;
+    }
+
+    professional = p;
+
+    $('greeting').textContent = 'Olá, ' + p.nome;
+    $('date').value = localDate();
+    $('loginMessage').textContent = '';
+
+    showPortal();
+    await load();
+
+  } catch (error) {
+    showLoginError(
+      'Erro ao abrir o portal: ' + readableError(error)
+    );
+  }
+}
+
+// CARREGAR AGENDA
+async function load() {
+  if (!professional) return;
+
+  message('Carregando agenda...');
+
+  try {
+    const date = $('date').value;
+
+    if (!date) {
+      message('Selecione uma data.', true);
+      return;
+    }
+
+    // Intervalo do dia no horário de Brasília
+    const start = date + 'T00:00:00-03:00';
+
+    const nextDate = new Date(date + 'T12:00:00');
+    nextDate.setDate(nextDate.getDate() + 1);
+
+    const end = fmt(nextDate) + 'T00:00:00-03:00';
+
+    const [r, s] = await Promise.all([
+      db.from('agendamentos')
+        .select(
+          'id,cliente_nome,cliente_telefone,' +
+          'profissional_id,servico_id,inicio,fim,status'
+        )
+        .eq('profissional_id', professional.id)
+        .gte('inicio', start)
+        .lt('inicio', end)
+        .order('inicio', { ascending: true }),
+
+      db.from('servicos')
+        .select('id,nome')
+    ]);
+
+    if (r.error) {
+      message(
+        'Erro ao consultar a agenda: ' + readableError(r.error),
+        true
+      );
+      return;
+    }
+
+    bookings = r.data || [];
+    services = s.error ? [] : (s.data || []);
+
+    render();
+    message('Agenda atualizada com sucesso.');
+
+  } catch (error) {
+    message('Erro: ' + readableError(error), true);
+  }
+}
+
+// MOSTRAR ATENDIMENTOS
+function render() {
+  const list = $('bookings');
+  list.replaceChildren();
+
+  const active = bookings.filter(
+    item => !cancelled(item.status)
+  );
+
+  const totalMinutes = Math.round(
+    active.reduce((total, item) => {
+      const minutes =
+        (new Date(item.fim) - new Date(item.inicio)) / 60000;
+
+      return total + (Number.isFinite(minutes) ? minutes : 0);
+    }, 0)
+  );
+
+  $('kpis').replaceChildren();
+
+  const indicators = [
+    ['Agendamentos', active.length],
+    ['Cancelados', bookings.length - active.length],
+    ['Minutos agendados', totalMinutes]
+  ];
+
+  for (const [label, value] of indicators) {
+    const card = document.createElement('div');
+    card.className = 'kpi';
+
+    const title = document.createElement('div');
+    title.className = 'sub';
+    title.textContent = label;
+
+    const number = document.createElement('strong');
+    number.textContent = value;
+
+    card.append(title, number);
+    $('kpis').append(card);
+  }
+
+  if (!bookings.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = 'Nenhum atendimento nesta data.';
+    list.append(empty);
+  }
+
+  for (const booking of bookings) {
+    const card = document.createElement('div');
+    card.className = 'appt';
+
+    const info = document.createElement('div');
+
+    const name = document.createElement('b');
+    name.textContent = booking.cliente_nome || 'Cliente';
+
+    const service = services.find(
+      item => String(item.id) === String(booking.servico_id)
+    );
+
+    const detail = document.createElement('small');
+
+    detail.textContent =
+      time(booking.inicio) + ' – ' +
+      time(booking.fim) + ' • ' +
+      (service?.nome || 'Serviço') + ' • ' +
+      (booking.status || 'Agendado');
+
+    info.append(name, detail);
+
+    const phone = document.createElement('span');
+    phone.className = 'sub';
+    phone.textContent = booking.cliente_telefone || '';
+
+    card.append(info, phone);
+    list.append(card);
+  }
+
+  $('performance').textContent =
+    active.length + ' agendamento(s) ativo(s) e ' +
+    totalMinutes + ' minuto(s) programado(s) para ' +
+    $('date').value + '.';
+}
+
+// ENTRAR
+$('loginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const button = $('loginButton');
+  button.disabled = true;
+
+  $('loginMessage').textContent = 'Verificando acesso...';
+
+  try {
+    if (!db) {
+      connectSupabase();
+    }
+
+    const email = $('email').value.trim();
+    const password = $('password').value;
+
+    const { error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      showLoginError(
+        'Não foi possível entrar: ' + readableError(error)
+      );
+      return;
+    }
+
+    $('loginMessage').textContent = '';
+    await init();
+
+  } catch (error) {
+    showLoginError(
+      'Erro no login: ' + readableError(error)
+    );
+  } finally {
+    button.disabled = false;
+  }
+});
+
+// SAIR
+$('logout').addEventListener('click', async () => {
+  try {
+    await db.auth.signOut();
+  } catch (error) {
+    console.error(error);
+  }
+
+  professional = null;
+  bookings = [];
+  services = [];
+
+  $('password').value = '';
+  showLoginError('');
+});
+
+// NAVEGAÇÃO DA AGENDA
+$('date').addEventListener('change', load);
+
+$('refresh').addEventListener('click', load);
+
+$('today').addEventListener('click', () => {
+  $('date').value = localDate();
+  load();
+});
+
+function move(days) {
+  const date = new Date($('date').value + 'T12:00:00');
+
+  date.setDate(date.getDate() + days);
+
+  $('date').value = fmt(date);
+  load();
+}
+
+$('prev').addEventListener('click', () => move(-1));
+$('next').addEventListener('click', () => move(1));
+
+// ABAS
+document.querySelectorAll('[data-tab]').forEach(button => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab]').forEach(item => {
+      item.classList.toggle('active', item === button);
+    });
+
+    $('agendaView').style.display =
+      button.dataset.tab === 'agenda' ? 'block' : 'none';
+
+    $('resumoView').style.display =
+      button.dataset.tab === 'resumo' ? 'block' : 'none';
+  });
+});
+
+// INICIAR PORTAL
+try {
+  connectSupabase();
+
+  init().catch(error => {
+    showLoginError(
+      'Erro na inicialização: ' + readableError(error)
+    );
+  });
+
+} catch (error) {
+  showLoginError(
+    'Erro de configuração: ' + readableError(error)
+  );
+}
+</script>
+
+</body>
+</html>
