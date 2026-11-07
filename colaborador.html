@@ -7,6 +7,31 @@
 
 /* Linhas da agenda com nome, servico e pagamento confirmado no caixa */
 .agenda-cell{min-width:0;background:#142137;display:flex;flex-direction:column;justify-content:center}.booking-line{width:100%;text-align:left;border-radius:0;background:#263c58;padding:10px 13px;display:flex;flex-direction:column;gap:5px;border-left:4px solid #e0293b;min-height:65px}.booking-line+.booking-line{border-top:1px solid #51627a}.booking-line small{color:#d7e1f0;font-weight:400}.booking-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.booking-top b{overflow-wrap:anywhere}.pay-tag{font-size:11px;font-style:normal;border-radius:20px;padding:4px 7px;white-space:nowrap}.is-paid{background:#19523b;color:#b7ffda}.is-pending{background:#6a4021;color:#ffe2b2}.is-unknown{background:#465368;color:#e2e7ef}.continuation{padding:12px 13px;color:#b9c7d9;font-size:13px;border-left:4px solid #526780}.agenda-cell .timeline-slot{min-height:65px}.timeline-row{min-height:65px}@media(max-width:650px){.booking-line{padding:9px}.booking-top{align-items:flex-start}.pay-tag{font-size:10px}.booking-line small{font-size:12px}}
+
+/* Agenda visual: blocos contínuos proporcionais à duração real */
+.visual-timeline{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);overflow:hidden;border:1px solid #344862;border-radius:0 0 12px 12px;background:#101d31}
+.visual-hours{position:relative;border-right:1px solid #344862;background:#142137}
+.visual-track{position:relative;min-width:0;background:#101d31}
+.visual-hour{position:absolute;left:0;right:0;transform:translateY(-50%);padding:0 6px;text-align:center;color:#c9d5e6;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;pointer-events:none}
+.visual-hour.major{font-size:14px;color:#fff}
+.visual-rule{position:absolute;left:0;right:0;height:1px;background:#2b3b54;pointer-events:none}
+.visual-rule.major{background:#40536e}
+.visual-free{position:absolute;left:0;right:0;height:56px;background:transparent;border-radius:0;padding:5px 12px;text-align:left;color:#759a91;font-size:12px;font-weight:500}
+.visual-free:hover,.visual-free:focus-visible{background:#1a393b;color:#e4fff0;outline:1px solid #4eab88;outline-offset:-1px}
+.visual-booking{position:absolute;left:5px;right:5px;width:calc(100% - 10px);z-index:2;border-radius:7px;border-left:5px solid #79a8ff;background:#153e89;color:#fff;text-align:left;padding:8px 11px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:3px;overflow:hidden;box-shadow:0 1px 5px #0005}
+.visual-booking.alt{background:#20158a;border-left-color:#a18cff}
+.visual-booking.paid{border-left-color:#55d9a1}
+.visual-booking b{font-size:14px;line-height:1.2;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.visual-booking .booking-detail{font-size:12px;font-weight:500;line-height:1.2;color:#e1eaff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.visual-booking .pay-tag{font-size:10px;padding:3px 7px;margin-top:2px}
+.visual-booking.compact{padding:5px 8px;gap:1px;justify-content:center}
+.visual-booking.compact b{font-size:12px}
+.visual-booking.compact .booking-detail{font-size:11px}
+.visual-booking.tiny .booking-detail,.visual-booking.tiny .pay-tag{display:none}
+.visual-booking.tiny{justify-content:center}
+.timeline-head{grid-template-columns:72px minmax(0,1fr)}
+@media(min-width:651px){.visual-timeline,.timeline-head{grid-template-columns:92px minmax(0,1fr)}}
+@media(max-width:650px){.visual-booking{left:4px;right:4px;width:calc(100% - 8px);padding:7px 8px}.visual-booking b{font-size:13px}.visual-booking .booking-detail{font-size:11px}.visual-hour{font-size:11px}.visual-hour.major{font-size:13px}}
 </style></head><body>
 <section id="login" class="login card"><div class="brand">✂ BARBEARIA <span>TALENTO</span></div><p class="sub">Acesso exclusivo para colaboradores</p><form id="loginForm"><label>E-mail<input type="email" id="email" autocomplete="username" required></label><label>Senha<input type="password" id="password" autocomplete="current-password" required></label><button id="loginButton" type="submit">Entrar na minha agenda</button></form><p id="loginMessage" class="error" role="alert"></p></section>
 <main id="portal" class="shell"><header class="header"><div><div class="brand">✂ <span>TALENTO</span></div><h1 id="greeting">Minha agenda</h1><div class="sub">Portal do colaborador</div></div><button id="logout" class="secondary">Sair</button></header><div class="tabs"><button data-tab="agenda" class="active">Minha agenda</button><button data-tab="resumo">Meu desempenho</button></div><section id="agendaView"><div class="card"><div class="row"><button id="prev" class="secondary">❮</button><input type="date" id="date" class="date"><button id="next" class="secondary">❯</button><button id="today" class="secondary">Hoje</button><button id="refresh" class="secondary">Atualizar</button><button id="newBooking">+ Novo agendamento</button></div><p id="status" class="status"></p></div><div id="kpis" class="kpis"></div><div class="card" style="margin-top:15px"><div class="agenda-heading"><div><h2>Agenda do dia</h2><p class="sub">Toque em um horário livre para agendar. Os horários ocupados ficam identificados.</p></div><span class="pro-chip" id="proChip">✂ Minha agenda</span></div><div class="timeline-head"><span>Horário</span><span id="proColumn">Profissional</span></div><div id="slots" class="timeline" aria-label="Horários da agenda"></div></div><div class="card"><h2>Atendimentos do dia</h2><div id="bookings"></div></div></section><section id="resumoView" style="display:none"><div class="card"><h2>Meu desempenho</h2><p class="sub">Resumo de agendamentos; comissões serão configuradas posteriormente.</p><div id="performance"></div></div></section>
@@ -35,18 +60,43 @@ async function load(){if(!professional)return;const date=$('date').value;if(!dat
 function render(){const active=bookings.filter(b=>!isCancelled(b));const total=active.reduce((n,b)=>n+Math.max(0,(new Date(b.fim)-new Date(b.inicio))/60000),0);$('kpis').replaceChildren();[['Agendamentos',active.length],['Cancelados',bookings.length-active.length],['Minutos agendados',Math.round(total)]].forEach(([k,v])=>{const d=document.createElement('div');d.className='kpi';const a=document.createElement('div');a.className='sub';a.textContent=k;const b=document.createElement('strong');b.textContent=v;d.append(a,b);$('kpis').append(d)});$('performance').textContent=`${active.length} atendimento(s) ativo(s), ${Math.round(total)} minutos programados em ${$('date').value}.`;
 const list=$('bookings');list.replaceChildren();if(!bookings.length){const p=document.createElement('p');p.className='sub';p.textContent='Nenhum atendimento nesta data.';list.append(p)}for(const b of bookings){const d=document.createElement('div');d.className='appt';const left=document.createElement('div');const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';const desc=document.createElement('small');desc.textContent=`${time(b.inicio)}–${time(b.fim)} • ${services.find(s=>s.id===b.servico_id)?.nome||'Serviço'} • ${b.status||'Agendado'} • ${b.cliente_telefone||''}`;left.append(name,desc);const actions=document.createElement('div');actions.className='row';const edit=document.createElement('button');edit.textContent='Remarcar / editar';edit.className='secondary';edit.onclick=()=>openEditor(b);actions.append(edit);if(!isCancelled(b)){const cancel=document.createElement('button');cancel.textContent='Cancelar';cancel.onclick=()=>cancelBooking(b);actions.append(cancel)}d.append(left,actions);list.append(d)}
 const slots=$('slots');slots.replaceChildren();const date=$('date').value;const wh=workingHours(date);if(!wh){slots.textContent='Sem expediente neste dia.';return}
-const activeBookings=bookings.filter(x=>!isCancelled(x));
-for(let m=wh[0];m<wh[1];m+=20){
- const h=hh(m),startMs=range(date,h,20).start,endMs=startMs+20*60000;
- const starting=activeBookings.filter(x=>new Date(x.inicio).getTime()>=startMs&&new Date(x.inicio).getTime()<endMs);
- const occupying=activeBookings.find(x=>new Date(x.inicio).getTime()<endMs&&new Date(x.fim).getTime()>startMs);
- const row=document.createElement('div');row.className='timeline-row';const hour=document.createElement('div');hour.className='timeline-hour';hour.textContent=h;
- const cell=document.createElement('div');cell.className='agenda-cell';
- if(starting.length){for(const b of starting){const btn=document.createElement('button');btn.type='button';btn.className='booking-line';btn.onclick=()=>openEditor(b);const top=document.createElement('span');top.className='booking-top';const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';const pay=document.createElement('em');const paid=paymentIds.has(b.id);pay.className='pay-tag '+(paid?'is-paid':paymentReadable?'is-pending':'is-unknown');pay.textContent=paid?'✓ Pago':paymentReadable?'Pendente':'Pagamento não verificado';top.append(name,pay);const detail=document.createElement('small');detail.textContent=`${time(b.inicio)}–${time(b.fim)} • ${services.find(x=>String(x.id)===String(b.servico_id))?.nome||'Serviço'}`;btn.append(top,detail);cell.append(btn)}}
- else if(occupying){const span=document.createElement('div');span.className='continuation';span.textContent='↳ Em atendimento: '+(occupying.cliente_nome||'Cliente');cell.append(span)}
- else{const btn=document.createElement('button');btn.className='timeline-slot available';btn.textContent='+ Agendar';btn.onclick=()=>openEditor(null,h);cell.append(btn)}
- row.append(hour,cell);slots.append(row)
-}}
+// Cada intervalo de 20 minutos ocupa 56px; atendimentos são blocos sobrepostos às linhas.
+const pxPerMinute=56/20, totalHeight=(wh[1]-wh[0])*pxPerMinute;
+slots.className='visual-timeline';slots.style.height=totalHeight+'px';
+const hours=document.createElement('div');hours.className='visual-hours';
+const track=document.createElement('div');track.className='visual-track';
+slots.append(hours,track);
+const dayStart=range(date,hh(wh[0]),20).start;
+const activeBookings=bookings.filter(b=>!isCancelled(b));
+for(let m=wh[0];m<=wh[1];m+=20){
+ const y=(m-wh[0])*pxPerMinute,major=m%60===0;
+ const rule=document.createElement('div');rule.className='visual-rule'+(major?' major':'');rule.style.top=y+'px';track.append(rule);
+ if(m<wh[1]){
+  const label=document.createElement('div');label.className='visual-hour'+(major?' major':'');label.style.top=(y+(major?13:28))+'px';label.textContent=hh(m);hours.append(label);
+  const h=hh(m),startMs=dayStart+(m-wh[0])*60000,endMs=startMs+20*60000;
+  const occupied=activeBookings.some(b=>new Date(b.inicio).getTime()<endMs&&new Date(b.fim).getTime()>startMs);
+  if(!occupied){const free=document.createElement('button');free.type='button';free.className='visual-free';free.style.top=y+'px';free.textContent='+ Agendar';free.setAttribute('aria-label','Agendar às '+h);free.onclick=()=>openEditor(null,h);track.append(free)}
+ }
+}
+for(const [index,b] of activeBookings.entries()){
+ const startMs=new Date(b.inicio).getTime(),endMs=new Date(b.fim).getTime();
+ const top=Math.max(0,(startMs-dayStart)/60000*pxPerMinute);
+ const bottom=Math.min(totalHeight,(endMs-dayStart)/60000*pxPerMinute);
+ if(bottom<=top)continue;
+ const block=document.createElement('button');block.type='button';
+ const paid=paymentIds.has(b.id),height=bottom-top;
+ block.className='visual-booking'+(index%2?' alt':'')+(paid?' paid':'')+(height<90?' compact':'')+(height<47?' tiny':'');
+ block.style.top=(top+2)+'px';block.style.height=Math.max(20,height-4)+'px';
+ block.onclick=()=>openEditor(b);
+ const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';
+ const detail=document.createElement('span');detail.className='booking-detail';
+ detail.textContent=(services.find(x=>String(x.id)===String(b.servico_id))?.nome||'Serviço')+' • '+time(b.inicio)+'–'+time(b.fim);
+ const pay=document.createElement('span');pay.className='pay-tag '+(paid?'is-paid':paymentReadable?'is-pending':'is-unknown');
+ pay.textContent=paid?'✓ Pago':paymentReadable?'Pendente':'Pagamento não verificado';
+ block.append(name,detail,pay);block.title=name.textContent+' | '+detail.textContent+' | '+pay.textContent;
+ track.append(block);
+}
+}
 
 function fillTimes(date,selected='',exceptId=null){const sel=$('bookingTime');sel.replaceChildren();const wh=workingHours(date);if(!wh){sel.add(new Option('Sem expediente',''));return}const service=services.find(s=>String(s.id)===$('service').value);const dur=duration(service);for(let m=wh[0];m+dur<=wh[1];m+=20){const h=hh(m);if(!busy(date,h,dur,exceptId)||h===selected)sel.add(new Option(h,h))}if(selected&&![...sel.options].some(o=>o.value===selected))sel.add(new Option(selected+' (verificar)',selected));sel.value=selected||sel.options[0]?.value||''}
 function openEditor(b=null,h=''){editing=b;$('editorTitle').textContent=b?'Editar / remarcar atendimento':'Novo agendamento';$('clientName').value=b?.cliente_nome||'';$('clientPhone').value=b?.cliente_telefone||'';$('bookingDate').value=b?new Date(b.inicio).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}):$('date').value;$('bookingStatus').value=b?.status&&['agendado','confirmado','cancelado'].includes(b.status)?b.status:'agendado';$('service').replaceChildren();for(const s of services)$('service').add(new Option(s.nome,s.id));if(b)$('service').value=b.servico_id;fillTimes($('bookingDate').value,b?time(b.inicio):h,b?.id);$('editorMessage').textContent='';$('editor').style.display='block';$('editor').scrollIntoView({behavior:'smooth',block:'start'})}
