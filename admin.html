@@ -280,7 +280,7 @@ $('cashType').addEventListener('change',updateCashType);
 $('cashDate').value=today();$('cashDate').addEventListener('change',loadCash);
 $('cashToday').addEventListener('click',()=>{$('cashDate').value=today();loadCash()});
 $('cashRefresh').addEventListener('click',loadCash);
-$('goCash').addEventListener('click',()=>showView('caixa'));
+if($('goCash')) $('goCash').addEventListener('click',()=>showView('caixa'));
 $('cashForm').addEventListener('submit',async e=>{
  e.preventDefault();const tipo=$('cashType').value,valor=Number($('cashValue').value),profissional_id=tipo==='vale'?$('cashProf').value:null;
  if(!Number.isFinite(valor)||valor<=0||(tipo==='vale'&&!profissional_id)){$('cashMsg').textContent='Preencha os dados do lançamento.';return}
