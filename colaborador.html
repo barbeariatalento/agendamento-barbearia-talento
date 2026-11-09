@@ -1,163 +1,429 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Talento | Minha Agenda</title><style>
-:root{font-family:Arial,sans-serif;color-scheme:dark;--bg:#090d16;--card:#131e30;--line:#293b54;--red:#e0293b;--muted:#a8b7ce}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f5f8ff}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:9px;padding:11px 15px;background:var(--red);color:white;font-weight:700}button.secondary{background:#283b55}button:disabled{opacity:.5;cursor:not-allowed}input,select{width:100%;padding:12px;border-radius:9px;border:1px solid #3b4e66;background:#0c1421;color:white}.shell{max-width:1100px;margin:auto;padding:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:19px;margin:0 0 15px}.login{max-width:420px;margin:8vh auto}.login form,.form{display:grid;gap:12px}.brand{font-size:23px;font-weight:900}.brand span{color:var(--red)}.sub,small{color:var(--muted)}.header,.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between}.row{justify-content:flex-start}.header{margin-bottom:18px}.tabs{display:flex;gap:9px;margin:15px 0}.tabs button{background:#283b55}.tabs button.active{background:var(--red)}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{background:#1b2b42;padding:14px;border-radius:12px}.kpi strong{display:block;font-size:25px;margin-top:7px}.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:9px}.slot{background:#1b3d35;border:1px solid #326a56}.slot.busy{background:#4a2c36;border-color:#6b3b49}.slot.closed{opacity:.5}.appt{padding:13px;background:#19283d;border-radius:10px;margin:9px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.appt b{display:block}.error{color:#ff9ca4;white-space:pre-wrap}.status{color:#a5edc8;white-space:pre-wrap}.date{width:auto}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fields label{display:grid;gap:5px;font-size:14px}.full{grid-column:1/-1}#portal,#editor{display:none}@media(max-width:650px){.shell{padding:10px}.fields{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.date{max-width:175px}}
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Talento | Painel Administrativo</title>
+<style>
+:root{--bg:#101116;--side:#17191f;--panel:#202229;--line:#34363f;--text:#f5f5f6;--muted:#a9aab2;--red:#e02832;--red2:#9f1821;--green:#43b581}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}input,select{background:#181a20;color:white;border:1px solid #484a54;border-radius:9px;padding:11px;width:100%;min-width:0}label{font-size:13px;color:var(--muted);display:block;margin:0 0 7px}.btn{border:0;border-radius:9px;background:var(--red);color:white;padding:11px 15px;font-weight:700}.btn.alt{background:#34363f}.btn:hover{filter:brightness(1.12)}.login-wrap{min-height:100vh;display:grid;place-items:center;padding:22px}.login-card{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:0 15px 50px #0006}.logo{font-size:23px;font-weight:900;letter-spacing:.8px}.logo span{color:var(--red)}.muted{color:var(--muted)}.login-card form{display:grid;gap:14px;margin-top:25px}.error{color:#ff9ba0;white-space:pre-wrap}.app{display:none;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:226px;background:var(--side);border-right:1px solid var(--line);padding:23px 13px;display:flex;flex-direction:column;gap:24px;z-index:4}.sidebar .logo{padding:5px 10px}.nav{display:grid;gap:6px}.nav button{width:100%;text-align:left;border:0;background:transparent;color:#bdbdc4;padding:13px;border-radius:9px;font-weight:600}.nav button.active,.nav button:hover{background:#3a2026;color:#fff}.nav button.active{border-left:3px solid var(--red)}.sidebar{overflow-y:auto}.sidefoot{margin-top:auto;border-top:1px solid var(--line);padding-top:15px}.content{margin-left:226px;padding:27px 29px;min-width:0}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:23px}.top h1{font-size:26px;margin:0 0 5px}.top p{margin:0}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:19px;margin-bottom:16px}.toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.toolbar .field{width:190px}.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0}.kpi{padding:17px;background:#25272f;border:1px solid var(--line);border-radius:12px}.kpi strong{font-size:27px;display:block;margin-top:6px}.schedule-scroll{overflow:auto;border:1px solid var(--line);border-radius:13px;background:#1c1e24}.schedule{display:grid;grid-template-columns:68px repeat(4,minmax(185px,1fr));min-width:820px}.headcell{position:sticky;top:0;background:#292b34;padding:15px 10px;text-align:center;font-weight:750;border-right:1px solid var(--line);border-bottom:2px solid var(--red);z-index:2}.timecol{background:#22242c;position:relative;border-right:1px solid var(--line)}.time-label{position:absolute;right:10px;color:#aeb0bb;font-size:12px;transform:translateY(-7px)}.procol{position:relative;border-right:1px solid var(--line);background:repeating-linear-gradient(to bottom,#1d1f26 0,#1d1f26 59px,#363842 59px,#363842 60px)}.booking{position:absolute;left:5px;right:5px;background:#4b2930;border-left:4px solid #f14650;border-radius:7px;padding:7px 8px;overflow:hidden;font-size:12px;z-index:1;box-shadow:0 2px 5px #0004}.booking strong{display:block;font-size:13px}.booking small{color:#f0b9be}.booking.cancel{opacity:.5;border-color:#888;background:#303038}.empty{text-align:center;padding:30px;color:var(--muted)}.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.person{background:#292b33;border:1px solid var(--line);border-radius:12px;padding:20px}.person b{font-size:18px}.pill{display:inline-block;border-radius:30px;padding:4px 9px;background:#244b3b;color:#9ef0c5;font-size:12px;margin-top:10px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:600px}td,th{padding:13px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{color:#aaaeb9}.modal-wrap{position:fixed;inset:0;background:#000b;z-index:10;display:none;align-items:center;justify-content:center;padding:20px}.modal{width:min(520px,100%);max-height:95vh;overflow:auto;background:#252730;border:1px solid #555761;border-radius:15px;padding:24px}.modal h2{margin-top:0}.modal form{display:grid;grid-template-columns:1fr 1fr;gap:13px}.modal form .full{grid-column:1/-1}.modal .footer{display:flex;gap:10px;justify-content:flex-end}.notice{font-size:13px;color:#c3c4cb}.mobilemenu{display:none}@media(max-width:850px){.sidebar{width:68px;padding:18px 6px}.sidebar .logo{font-size:12px;padding:4px}.nav button{font-size:0;text-align:center;padding:13px 5px}.nav button::first-letter{font-size:20px}.sidefoot{font-size:0}.sidefoot button{font-size:12px}.content{margin-left:68px;padding:17px}.kpis{grid-template-columns:1fr 1fr}.top h1{font-size:22px}}@media(max-width:490px){.kpis{grid-template-columns:1fr}.modal form{grid-template-columns:1fr}.modal form .full{grid-column:auto}}
+/* Layout do aplicativo no celular: colunas legíveis e rolagem horizontal */
+@media (max-width: 600px) {
+  .sidebar { width: 245px; padding: 20px 13px; transform: translateX(-105%); transition: transform .2s ease; z-index: 30; box-shadow: 10px 0 35px #0008; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar .logo { font-size: 20px; }
+  .nav button { font-size: 14px; text-align: left; padding: 12px; }
+  .nav button::first-letter { font-size: inherit; }
+  .sidefoot, .sidefoot button { font-size: 13px; }
+  .content { margin-left: 0; padding: 12px 9px; width: 100%; min-width: 0; }
+  .top { align-items: center; gap: 10px; margin-bottom: 12px; }
+  .top h1 { font-size: 21px; }
+  .top p { font-size: 11px; }
+  .actions { width: 100%; }
+  .actions .btn { flex: 1; padding: 11px 7px; font-size: 12px; }
+  .panel { padding: 10px 7px; border-radius: 10px; }
+  .toolbar { gap: 8px; }
+  .toolbar .field { width: min(170px, 54%); }
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+  .kpi { padding: 8px 5px; }
+  .kpi strong { font-size: 17px; }
+  .kpi .muted { font-size: 10px; }
+  .schedule-scroll { width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
+  .schedule { width: max-content; min-width: 850px; grid-template-columns: 48px repeat(4, 200px); }
+  .headcell { padding: 12px 5px; font-size: 12px; }
+  .time-label { right: 5px; font-size: 10px; }
+  .booking { left: 4px; right: 4px; padding: 6px; font-size: 11px; }
+  .booking strong { font-size: 12px; }
+  .booking small { font-size: 10px; }
+  .mobilemenu { display: inline-flex; align-items: center; justify-content: center; background: #34363f; border: 0; border-radius: 9px; color: white; width: 40px; height: 40px; font-size: 23px; flex-shrink: 0; }
+  .mobile-top-title { display: flex; align-items: center; gap: 9px; }
+  .mobile-shade { display: none; position: fixed; inset: 0; background: #0009; z-index: 29; }
+  .mobile-shade.show { display: block; }
+  .modal form { grid-template-columns: 1fr; }
+  .modal form .full { grid-column: auto; }
+}
 
-/* Agenda adaptada para celulares, sem colunas vazias ou rolagem horizontal */
-.shell{max-width:1020px}.agenda-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.agenda-heading h2{margin:0 0 8px}.agenda-heading p{margin:0 0 15px;line-height:1.5}.pro-chip{padding:9px 13px;border:1px solid #4a5c75;border-radius:30px;background:#1d2d43;font-weight:700;white-space:nowrap}.timeline{border:1px solid #344862;border-radius:12px;overflow:hidden}.timeline-head,.timeline-row{display:grid;grid-template-columns:92px minmax(0,1fr)}.timeline-head{background:#263850;font-weight:700;color:#fff}.timeline-head span{padding:15px}.timeline-head span+span{border-left:1px solid #415572}.timeline-row{min-height:65px;border-top:1px solid #344862}.timeline-hour{display:flex;align-items:center;justify-content:center;color:#d6e0f0;font-weight:700;background:#111d2e;font-variant-numeric:tabular-nums}.timeline-slot{width:100%;border-radius:0;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:14px 17px;min-height:65px}.timeline-slot.available{background:#15372f;color:#e4fff0}.timeline-slot.available:active{background:#205e4b}.timeline-slot.occupied{background:#392833;color:#f2c7ce;opacity:1;cursor:default}.timeline-slot strong{font-size:14px;white-space:nowrap}.timeline-slot span{font-size:14px;font-weight:500}.kpis{margin-bottom:15px}.card{overflow-wrap:anywhere}
-@media(max-width:650px){.shell{padding:12px}.card{padding:14px;border-radius:13px}.header{align-items:flex-start}.header h1{font-size:26px}.tabs button{flex:1;padding:12px 8px}.row{gap:8px}.row button{padding:10px 12px}#newBooking{width:100%}.date{flex:1;min-width:145px;max-width:none}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{padding:12px}.kpi strong{font-size:23px}.timeline-head,.timeline-row{grid-template-columns:72px minmax(0,1fr)}.timeline-head span{padding:12px 9px}.timeline-hour{font-size:14px}.timeline-slot{padding:12px;min-height:60px}.timeline-slot span{font-size:13px}.timeline-slot strong{font-size:13px}.pro-chip{font-size:13px}.agenda-heading h2{font-size:20px}.appt{align-items:stretch}.appt .row{width:100%}.appt .row button{flex:1}}
+.service-form{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;margin:15px 0}.service-list{display:grid;gap:8px}.service-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;background:#292b33;border:1px solid var(--line);border-radius:10px}.service-row .btn{flex-shrink:0}.service-note{font-size:13px;color:var(--muted)}@media(max-width:650px){.service-form{grid-template-columns:1fr 1fr}.service-form .service-name{grid-column:1/-1}.service-form button{grid-column:1/-1}.service-row{flex-wrap:wrap}}
 
-/* Linhas da agenda com nome, servico e pagamento confirmado no caixa */
-.agenda-cell{min-width:0;background:#142137;display:flex;flex-direction:column;justify-content:center}.booking-line{width:100%;text-align:left;border-radius:0;background:#263c58;padding:10px 13px;display:flex;flex-direction:column;gap:5px;border-left:4px solid #e0293b;min-height:65px}.booking-line+.booking-line{border-top:1px solid #51627a}.booking-line small{color:#d7e1f0;font-weight:400}.booking-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.booking-top b{overflow-wrap:anywhere}.pay-tag{font-size:11px;font-style:normal;border-radius:20px;padding:4px 7px;white-space:nowrap}.is-paid{background:#19523b;color:#b7ffda}.is-pending{background:#6a4021;color:#ffe2b2}.is-unknown{background:#465368;color:#e2e7ef}.continuation{padding:12px 13px;color:#b9c7d9;font-size:13px;border-left:4px solid #526780}.agenda-cell .timeline-slot{min-height:65px}.timeline-row{min-height:65px}@media(max-width:650px){.booking-line{padding:9px}.booking-top{align-items:flex-start}.pay-tag{font-size:10px}.booking-line small{font-size:12px}}
+.prof-photo{width:88px;height:88px;object-fit:cover;border-radius:50%;border:3px solid var(--red);display:block;margin-bottom:12px;background:#34363f}.prof-photo-placeholder{display:grid;place-items:center;font-size:34px;color:#ccc}.prof-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.prof-actions input[type=file]{display:none}.prof-feedback{font-size:12px;color:#ffb4b8;margin-top:8px;min-height:15px}
 
-/* Agenda visual: blocos contínuos proporcionais à duração real */
-.visual-timeline{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);overflow:hidden;border:1px solid #344862;border-radius:0 0 12px 12px;background:#101d31}
-.visual-hours{position:relative;border-right:1px solid #344862;background:#142137}
-.visual-track{position:relative;min-width:0;background:#101d31}
-.visual-hour{position:absolute;left:0;right:0;transform:translateY(-50%);padding:0 6px;text-align:center;color:#c9d5e6;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;pointer-events:none}
-.visual-hour.major{font-size:14px;color:#fff}
-.visual-rule{position:absolute;left:0;right:0;height:1px;background:#2b3b54;pointer-events:none}
-.visual-rule.major{background:#40536e}
-.visual-free{position:absolute;left:0;right:0;height:56px;background:transparent;border-radius:0;padding:5px 12px;text-align:left;color:#759a91;font-size:12px;font-weight:500}
-.visual-free:hover,.visual-free:focus-visible{background:#1a393b;color:#e4fff0;outline:1px solid #4eab88;outline-offset:-1px}
-.visual-booking{position:absolute;left:5px;right:5px;width:calc(100% - 10px);z-index:2;border-radius:7px;border-left:5px solid #79a8ff;background:#153e89;color:#fff;text-align:left;padding:8px 11px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:3px;overflow:hidden;box-shadow:0 1px 5px #0005}
-.visual-booking.alt{background:#20158a;border-left-color:#a18cff}
-.visual-booking.paid{border-left-color:#55d9a1}
-.visual-booking b{font-size:14px;line-height:1.2;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.visual-booking .booking-detail{font-size:12px;font-weight:500;line-height:1.2;color:#e1eaff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.visual-booking .pay-tag{font-size:10px;padding:3px 7px;margin-top:2px}
-.visual-booking.compact{padding:5px 8px;gap:1px;justify-content:center}
-.visual-booking.compact b{font-size:12px}
-.visual-booking.compact .booking-detail{font-size:11px}
-.visual-booking.tiny .booking-detail,.visual-booking.tiny .pay-tag{display:none}
-.visual-booking.tiny{justify-content:center}
-.timeline-head{grid-template-columns:72px minmax(0,1fr)}
-@media(min-width:651px){.visual-timeline,.timeline-head{grid-template-columns:92px minmax(0,1fr)}}
-@media(max-width:650px){.visual-booking{left:4px;right:4px;width:calc(100% - 8px);padding:7px 8px}.visual-booking b{font-size:13px}.visual-booking .booking-detail{font-size:11px}.visual-hour{font-size:11px}.visual-hour.major{font-size:13px}}
-/* Talento Pro — identidade visual aprovada */
-:root{--bg:#0c0e13;--card:#191d26;--line:#333946;--red:#d92738;--muted:#aab2c0;font-family:Inter,system-ui,Arial,sans-serif}
-body{background:var(--bg)}.shell{max-width:1050px}.card{border-radius:18px;box-shadow:0 8px 28px #0002}.header{padding:17px 19px;border:1px solid #333946;background:#191d26;border-radius:18px}.header .brand{font-size:28px;color:#fff}.header h1{font-size:24px}.tabs{background:#191d26;padding:7px;border-radius:15px}.tabs button{flex:1;background:#252a35}.tabs button.active{background:#d92738}.kpi{background:#202631;border:1px solid #333946;border-radius:14px}.kpi strong{color:#fff}.kpi:nth-child(3) strong{color:#80e0ad}.visual-timeline{background:#141821;border-color:#353b49}.visual-hours{background:#151922}.visual-track{background:#151922}.visual-rule{background:#303642}.visual-rule.major{background:#48515f}.visual-free{color:#8393a5}.visual-free:hover{background:#23352f}.visual-booking{background:#702735;border-left-color:#ff5965}.visual-booking.alt{background:#762d3c;border-left-color:#ff5965}.visual-booking.paid{border-left-color:#7de3ac}.visual-booking.visual-block{background:#65451e;border-left-color:#e9ad48}.visual-block .booking-detail{color:#ffe1ac}#choice,#blockEditor{border-color:#d92738}#commissionSummary{grid-template-columns:repeat(2,minmax(0,1fr))}#commissionSummary .kpi:first-child{grid-column:1/-1}#commissionSummary .kpi:first-child strong{font-size:32px;color:#fff}#commissionSummary .kpi:nth-child(3) strong{color:#7de3ac}@media(max-width:650px){.header .brand{font-size:23px}.visual-timeline{grid-template-columns:72px minmax(0,1fr)}#commissionSummary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.booking{cursor:pointer}.booking.paid{border-left-color:#43b581;background:#204038}.paid-tag{color:#a9f6c9;font-weight:800}.cash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:15px 0}.cash-stat{background:#292b33;padding:16px;border-radius:10px}.cash-stat strong{display:block;font-size:23px;margin-top:7px}.cash-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;align-items:end}.cash-table{width:100%;min-width:650px}.cash-table button{padding:6px 10px}.cash-hint{font-size:12px;color:#aaa}.cash-modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+
+.product-form{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}.product-list{display:grid;gap:8px;margin-top:15px}.product-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#292b33}.product-row button{flex-shrink:0}.payment-product-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:8px 0}.payment-product-row select{flex:1}.payment-product-row input{width:80px}.payment-product-row button{flex-shrink:0}@media(max-width:650px){.product-form{grid-template-columns:1fr 1fr}.product-form .product-name{grid-column:1/-1}.product-form button{grid-column:1/-1}.payment-product-row{flex-wrap:wrap}}
+
+/* Agenda interativa: intervalos de 20 minutos */
+.procol{background:repeating-linear-gradient(to bottom,#1d1f26 0,#1d1f26 19px,#353740 19px,#353740 20px)}
+.free-slot{position:absolute;left:4px;right:4px;height:19px;border:0;background:transparent;color:transparent;text-align:left;padding:0 7px;font-size:11px;border-radius:4px;z-index:0}
+.free-slot:hover,.free-slot:focus-visible{background:#174a36;color:#c5ffdf;outline:1px solid #42c88b;z-index:2}
+.booking{z-index:3;cursor:pointer}
+.procol{cursor:crosshair}
+.free-slot{cursor:pointer}
+.free-slot:hover{font-weight:700}
+.headcell.prof-head{background:#222c3d;color:#fff;padding:13px 8px;min-height:64px;display:flex;align-items:center;justify-content:center;gap:10px}
+.headcell.prof-head img{width:37px;height:37px;object-fit:cover;border-radius:50%;border:2px solid #e02832}
+.headcell.prof-head .prof-initial{width:37px;height:37px;border-radius:50%;background:#3c4252;display:grid;place-items:center;font-size:18px}
+.booking{background:#263c78;border-left-color:#5796ff}
+.booking.cancel{background:#303038;border-left-color:#777}
+.booking.paid{background:#204038;border-left-color:#43b581}
+.time-label{font-size:11px}
+.schedule-hint{line-height:1.5}
+.schedule-hint{color:#b6e8c9;font-size:13px;margin:10px 0}
+@media(max-width:850px){.free-slot{color:#78ad93;font-size:10px}}
+
+/* Barbearia Talento — agenda inspirada na disposição do WhatsAgenda, mantendo funções originais */
+:root{--bg:#080d18;--side:#080c13;--panel:#101b2d;--line:#26354c;--text:#f6f8ff;--muted:#a4b1c7}
+body{background:var(--bg)}.sidebar{background:#080c13;border-right:1px solid #19283d}.sidebar .logo{letter-spacing:1px}.nav button{color:#b8c8db}.nav button.active,.nav button:hover{background:#0e332f;color:#5bdfb7}.nav button.active{border-left-color:#2dcaa0}.content{padding:20px 22px}.top{margin-bottom:13px}.panel{background:#10192a;border:1px solid #1c2b43}.kpis{margin:12px 0}.kpi{background:#14223a;border-color:#24344c}.kpi strong{font-size:23px}.agenda-toolbar{justify-content:center;background:#0e1728;padding:10px;border-radius:11px;gap:9px}.agenda-toolbar .field{width:195px}.agenda-toolbar input{background:#0c1423;border-color:#263b5b}.agenda-arrow{font-size:17px;min-width:40px}.schedule-scroll{background:#0d1930;border:1px solid #23354f;max-height:75vh;overflow:auto;scrollbar-color:#536a88 #111b2c}.schedule{grid-template-columns:65px repeat(var(--professional-count,4),minmax(220px,1fr));min-width:950px}.headcell{background:#202d43;border-bottom:2px solid #36587f;border-right:2px solid #152137;z-index:4}.headcell.prof-head{background:#202d43;min-height:72px;justify-content:flex-start;padding:11px 15px;gap:12px}.prof-head-details{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}.prof-head-details strong{font-size:14px;overflow-wrap:anywhere}.prof-head-details small{font-size:11px;color:#b8c9de}.headcell.prof-head img,.headcell.prof-head .prof-initial{width:44px;height:44px;flex-shrink:0;border-color:#607fa5}.time-heading{display:flex;align-items:center;justify-content:center;font-size:12px}.timecol{background:#14223a;border-right:2px solid #1f304b}.time-label{font-size:10px;color:#a4b7d0;right:7px}.time-label.hour-label{font-size:12px;color:#f4f7ff;font-weight:800}.procol{background:repeating-linear-gradient(to bottom,#101d34 0,#101d34 47px,#2b3d57 47px,#2b3d57 48px);border-right:2px solid #273a58}.procol::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0,transparent 143px,#4a6184 143px,#4a6184 144px)}.free-slot{left:2px;right:2px;height:47px;z-index:1}.free-slot:hover,.free-slot:focus-visible{background:#125745;color:#eafff8;outline:1px solid #42c88b;z-index:3}.booking{z-index:5;left:5px;right:5px;background:#18469b;border-left:4px solid #4f9aff;border-radius:5px;padding:6px 7px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 5px #0006}.booking strong{font-size:12px;line-height:1.2}.booking-service{font-size:11px;line-height:1.15}.booking small{color:#e5edff;font-size:10px}.booking-status{align-self:flex-start;background:#ffffff25;padding:2px 5px;border-radius:4px;font-size:10px;font-weight:700}.booking-color-1{background:#b658b4;border-left-color:#f0a8ed}.booking-color-2{background:#5b50c9;border-left-color:#9b8aff}.booking-color-3{background:#1368a6;border-left-color:#4ac3ef}.booking-color-4{background:#8a40b9;border-left-color:#c67fff}.booking-color-5{background:#176f79;border-left-color:#55d7dc}.booking.cancel{background:#2a3040;border-left-color:#6b7180;opacity:.48}.booking.paid{background:#145746;border-left-color:#4fdf9d;opacity:1}.schedule-hint{color:#9fc9bb}.btn{background:#d92536}.btn.alt{background:#27374f}.modal{background:#152238;border-color:#39506b}@media(max-width:850px){.schedule{grid-template-columns:55px repeat(var(--professional-count,4),minmax(205px,1fr));min-width:875px}}@media(max-width:600px){.schedule{grid-template-columns:50px repeat(var(--professional-count,4),205px);min-width:870px}.schedule-scroll{max-height:70vh}.headcell.prof-head{padding:8px}.agenda-toolbar{justify-content:flex-start}.agenda-toolbar .field{width:150px}.agenda-toolbar .muted{width:100%;font-size:12px}}
+
+/* Agenda compacta: mais horários visíveis, sem cartões de indicadores. */
+#view-agenda .panel{padding:12px 14px}
+#view-agenda .agenda-toolbar{padding:7px 9px}
+#view-agenda .schedule-hint{margin:7px 2px;font-size:12px}
+#view-agenda .schedule-scroll{max-height:calc(100vh - 240px);min-height:350px}
+#view-agenda .headcell.prof-head{min-height:57px;padding:7px 10px}
+#view-agenda .headcell.prof-head img,#view-agenda .headcell.prof-head .prof-initial{width:34px;height:34px}
+#view-agenda .prof-head-details small{font-size:10px}
+#view-agenda .notice{font-size:11px;margin:7px 0 0}
+@media(max-width:600px){
+ #view-agenda .panel{padding:8px 6px}
+ #view-agenda .schedule-scroll{max-height:calc(100dvh - 215px);min-height:330px}
+ #view-agenda .agenda-toolbar{padding:6px;gap:6px}
+ #view-agenda .schedule-hint{font-size:11px}
+}
 </style></head><body>
-<section id="login" class="login card"><div class="brand">✂ BARBEARIA <span>TALENTO</span></div><p class="sub">Acesso exclusivo para colaboradores</p><form id="loginForm"><label>E-mail<input type="email" id="email" autocomplete="username" required></label><label>Senha<input type="password" id="password" autocomplete="current-password" required></label><button id="loginButton" type="submit">Entrar na minha agenda</button></form><p id="loginMessage" class="error" role="alert"></p></section>
-<main id="portal" class="shell"><header class="header"><div><div class="brand" id="greeting">Minha agenda</div><div class="sub">Portal do colaborador</div></div><button id="logout" class="secondary">Sair</button></header><div class="tabs"><button data-tab="agenda" class="active">Minha agenda</button><button data-tab="resumo">Comissões</button></div><section id="agendaView"><div class="card"><div class="row"><button id="prev" class="secondary">❮</button><input type="date" id="date" class="date"><button id="next" class="secondary">❯</button><button id="today" class="secondary">Hoje</button><button id="refresh" class="secondary">Atualizar</button><button id="newBooking">+ Agendar cliente</button></div><p id="status" class="status"></p></div><div id="kpis" class="kpis"></div><div class="card" style="margin-top:15px"><div class="agenda-heading"><div><h2>Agenda do dia</h2><p class="sub">Clique em um horário livre para agendar um cliente ou bloquear o período. Linhas a cada 20 minutos.</p></div><span class="pro-chip" id="proChip">✂ Minha agenda</span></div><div class="timeline-head"><span>Horário</span><span id="proColumn">Profissional</span></div><div id="slots" class="timeline" aria-label="Horários da agenda"></div></div><div class="card"><h2>Atendimentos do dia</h2><div id="bookings"></div></div></section><section id="resumoView" style="display:none"><div class="card"><h2>Minhas comissões</h2><p class="sub">Comissões calculadas sobre pagamentos confirmados no Caixa. Vales são mostrados separadamente. Produtos cobrados junto com serviços podem precisar de conferência pelo administrador.</p><div class="row"><label>De <input id="comStart" type="date"></label><label>Até <input id="comEnd" type="date"></label><button id="comRefresh" type="button">Consultar</button></div><p id="comMsg" class="status"></p><div id="commissionSummary" class="kpis"></div><h3>Meus serviços pagos no período</h3><p class="sub">Pagamentos confirmados no caixa, com valor recebido e comissão de 50% por serviço.</p><div id="performance"></div></div></section>
-<section id="choice" class="card" style="display:none"><h2 id="choiceTitle">Horário livre</h2><p class="sub">O que você deseja fazer?</p><div class="row"><button type="button" id="choiceBooking">✂ Agendar cliente</button><button type="button" id="choiceBlock" class="secondary">🔒 Bloquear horário</button><button type="button" id="choiceClose" class="secondary">Voltar</button></div></section><section id="blockEditor" class="card" style="display:none"><h2>🔒 Bloquear horário</h2><form id="blockForm" class="form"><div class="fields"><label>Data<input id="blockDate" type="date" required></label><label>Motivo<select id="blockReason"><option>Almoço</option><option>Compromisso pessoal</option><option>Folga</option><option>Outro</option></select></label><label>Início<input id="blockStart" type="time" required></label><label>Término<input id="blockEnd" type="time" required></label></div><p id="blockMsg" class="error"></p><div class="row"><button type="submit" id="saveBlock">Confirmar bloqueio</button><button type="button" class="secondary" id="closeBlock">Voltar</button></div></form><p class="sub">Os bloqueios serão compartilhados com o administrador quando o banco de dados estiver configurado.</p></section><section id="editor" class="card"><h2 id="editorTitle">Novo agendamento</h2><form id="bookingForm" class="form"><div class="fields"><label>Nome do cliente<input id="clientName" required maxlength="120"></label><label>Telefone<input id="clientPhone" inputmode="tel" maxlength="30"></label><label>Serviço<select id="service" required></select></label><label>Data<input type="date" id="bookingDate" required></label><label>Início do atendimento<input type="time" id="bookingTime" required step="60"></label><label>Fim do atendimento<input type="time" id="bookingEnd" required step="60"></label><label>Status<select id="bookingStatus"><option value="agendado">Agendado</option><option value="confirmado">Confirmado</option><option value="cancelado">Cancelado</option></select></label></div><p id="editorMessage" class="error"></p><div class="row"><button type="submit" id="saveBooking">Salvar agendamento</button><button type="button" id="closeEditor" class="secondary">Voltar</button></div></form></section></main>
+<div id="loginWrap" class="login-wrap"><div class="login-card"><div class="logo">✂ BARBEARIA <span>TALENTO</span></div><p class="muted">Acesso administrativo</p><form id="loginForm"><div><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required></div><div><label for="senha">Senha</label><input id="senha" type="password" autocomplete="current-password" required></div><button class="btn" type="submit">Entrar no painel</button></form><p id="loginMsg" class="error" role="alert"></p></div></div>
+<div id="app" class="app"><div id="mobileShade" class="mobile-shade"></div><aside class="sidebar"><div class="logo">✂ <span>TALENTO</span></div><nav class="nav" aria-label="Menu"><button data-view="inicio">⌂ &nbsp; Início</button><button data-view="agenda" class="active">▦ &nbsp; Agenda</button><button data-view="servicos">✂ &nbsp; Serviços e preços</button><button data-view="profissionais">♟ &nbsp; Profissionais</button><button data-view="clientes">♧ &nbsp; Clientes</button><button data-view="caixa">▣ &nbsp; Caixa</button><button data-view="relatorios">▥ &nbsp; Relatórios</button><button data-view="lembretes">♧ &nbsp; Lembretes</button><button data-view="gestao">▤ &nbsp; Gestão da agenda</button><button data-view="pacotes">▣ &nbsp; Pacotes de clientes</button><button data-view="produtos">▧ &nbsp; Produtos</button><button data-view="financeiro">＄ &nbsp; Financeiro</button><button data-view="comissoes">% &nbsp; Comissões</button><button data-view="desempenho">▥ &nbsp; Desempenho da equipe</button></nav><div class="sidefoot"><p class="muted" style="font-size:12px">Administrador</p><button id="sair" class="btn alt" style="width:100%">Sair</button></div></aside><main class="content"><header class="top"><div class="mobile-top-title"><button type="button" id="mobileMenuButton" class="mobilemenu" aria-label="Abrir menu" aria-expanded="false">☰</button><div><h1 id="pageTitle">Agenda</h1><p class="muted">Barbearia Talento • Gestão de agendamentos</p></div></div><div class="actions"><button class="btn alt" id="refresh">↻ Atualizar</button><button class="btn" id="novo">+ Novo agendamento</button></div></header><p id="status" class="notice" role="status"></p>
+<section id="view-inicio" class="view"><div class="kpis" id="kpisInicio"></div><div class="panel"><h2>Visão geral</h2><p class="muted">Acompanhe os agendamentos e acesse as outras áreas pelo menu lateral.</p><button class="btn" data-go="agenda">Ver agenda completa</button></div></section>
+<section id="view-agenda" class="view active"><div class="panel"><div class="toolbar agenda-toolbar"><button class="btn alt agenda-arrow" id="diaAnterior" type="button" aria-label="Dia anterior">❮</button><div class="field"><label for="dataAgenda">Data da agenda</label><input id="dataAgenda" type="date"></div><button class="btn alt agenda-arrow" id="diaSeguinte" type="button" aria-label="Próximo dia">❯</button><button class="btn alt" id="hoje">Hoje</button><div class="muted" id="diaLabel"></div></div><p class="schedule-hint">Toque em um horário livre para agendar ou em um cliente para gerenciar e receber.</p><div class="schedule-scroll"><div class="schedule" id="schedule"></div></div><p class="notice">Agenda de todos os profissionais. Arraste horizontalmente no celular para visualizar as quatro colunas.</p></div></section>
+<section id="view-servicos" class="view"><div class="panel"><h2>✂ Serviços e preços</h2><p class="service-note" id="serviceInfo">Cadastre e edite os serviços. O preço depende da coluna de preços no Supabase.</p><form id="serviceForm" class="service-form"><div class="service-name"><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" required placeholder="Ex.: Corte masculino"></div><div><label for="serviceDuration">Duração (min)</label><input id="serviceDuration" type="number" min="5" max="480" required value="40"></div><div><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="0,00" disabled></div><button id="serviceSave" class="btn" type="submit">Salvar serviço</button></form><button id="serviceCancelEdit" class="btn alt" type="button" style="display:none;margin-bottom:12px">Cancelar edição</button><p class="notice" id="serviceMessage" role="status"></p><div id="serviceList" class="service-list"></div></div></section>
+<section id="view-profissionais" class="view"><div class="panel"><h2>Profissionais</h2><div id="profCards" class="cards"></div></div></section>
+<section id="view-clientes" class="view"><div class="panel"><h2>Clientes atendidos/agendados</h2><p class="notice">Lista obtida dos agendamentos disponíveis para o administrador.</p><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Telefone</th><th>Último agendamento</th></tr></thead><tbody id="clientesBody"></tbody></table></div></div></section>
+<section id="view-caixa" class="view"><div class="panel"><h2>💰 Caixa diário</h2><div class="toolbar"><div class="field"><label for="cashDate">Data do caixa</label><input type="date" id="cashDate"></div><button type="button" class="btn alt" id="cashToday">Hoje</button><button type="button" class="btn alt" id="cashRefresh">Atualizar</button></div><p class="cash-hint">Os pagamentos são recebidos clicando no cliente na Agenda. Vales são registrados aqui e descontados manualmente das comissões.</p><div class="cash-grid" id="cashSummary"></div><h3>Registrar vale ou despesa</h3><form id="cashForm" class="cash-form"><div><label for="cashType">Tipo</label><select id="cashType"><option value="vale">Vale / retirada de barbeiro</option><option value="despesa">Despesa da barbearia</option></select></div><div id="cashProfField"><label for="cashProf">Profissional</label><select id="cashProf" required></select></div><div><label for="cashValue">Valor (R$)</label><input id="cashValue" type="number" min="0.01" step="0.01" required></div><div><label for="cashDescription">Descrição</label><input id="cashDescription" maxlength="180" placeholder="Ex.: Adiantamento" required></div><button class="btn" type="submit" id="cashSave">Salvar lançamento</button></form><p id="cashMsg" class="notice" role="status"></p><h3>Movimentações do dia</h3><div class="table-wrap"><table class="cash-table"><thead><tr><th>Horário</th><th>Tipo</th><th>Descrição / profissional</th><th>Forma</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="cashRows"></tbody></table></div></div></section>
+<section id="view-relatorios" class="view"><div class="panel"><h2>Relatórios de agendamentos</h2><div class="kpis" id="kpisRelatorios"></div><p class="notice">Indicadores baseados nos agendamentos acessíveis ao administrador. Relatórios financeiros serão adicionados após configurar o Caixa.</p></div></section>
+<section id="view-lembretes" class="view"><div class="panel"><h2>🔔 Lembretes de agendamento</h2><p class="muted">Preparação para avisar o cliente pelo WhatsApp antes do horário. O envio automático ainda depende da integração com o Wapzen; nenhum lembrete será enviado por esta tela nesta etapa.</p></div></section>
+<section id="view-gestao" class="view"><div class="panel"><h2>🗓 Gestão da agenda</h2><p class="muted">Aqui vamos configurar horários individuais, folgas, férias, intervalos e bloqueios. Por enquanto a agenda continua usando o expediente atual: terça a sexta, 9h às 20h; sábado, 8h às 18h.</p></div></section>
+<section id="view-pacotes" class="view"><div class="panel"><h2>🎟 Pacotes de clientes</h2><p class="muted">Área reservada para cadastrar planos, acompanhar serviços utilizados e vencimentos. Ainda não há cadastro ou cobrança ativa nesta seção.</p></div></section>
+<section id="view-produtos" class="view"><div class="panel"><h2>📦 Produtos e estoque</h2><p class="notice">Cadastre o produto uma vez. Ao vender no recebimento, o estoque é descontado automaticamente.</p><form id="productForm" class="product-form"><div class="product-name"><label for="productName">Nome do produto</label><input id="productName" required maxlength="120" placeholder="Ex.: Pomada modeladora"></div><div><label for="productPrice">Preço (R$)</label><input id="productPrice" type="number" min="0.01" step="0.01" required></div><div><label for="productStock">Estoque (unidades)</label><input id="productStock" type="number" min="0" step="1" required></div><button id="productSave" class="btn" type="submit">Salvar produto</button></form><button id="productCancel" class="btn alt" type="button" style="display:none;margin-top:10px">Cancelar edição</button><p id="productMsg" class="notice" role="status"></p><div id="productList" class="product-list"></div></div></section>
+<section id="view-financeiro" class="view"><div class="panel"><h2>💰 Financeiro</h2><p class="muted">Resumo financeiro do dia selecionado no Caixa. Para registrar despesas e vales, abra Caixa.</p><div id="financeSummary" class="cash-grid"></div><button class="btn" type="button" id="goCash">Abrir caixa</button></div></section>
+<section id="view-desempenho" class="view"><div class="panel"><h2>📊 Desempenho da equipe</h2><p class="muted">Ocupação estimada com base nos agendamentos do dia e no expediente padrão. Folgas e bloqueios individuais ainda não entram no cálculo.</p><div id="ocupacaoEquipe" class="cards"></div><h3>Serviços extras</h3><p class="muted">O fechamento de serviços extras será ativado depois de criarmos o registro de extras por atendimento. Não há valores fictícios aqui.</p></div></section>
+<section id="view-comissoes" class="view"><div class="panel"><h2>💈 Comissões reais por profissional</h2><p class="notice">Serviços: 50% • Produtos: 10%. Calculado sobre pagamentos confirmados, sem lançamentos estornados. Vales são mostrados separadamente e o desconto é escolhido manualmente.</p><div class="toolbar"><div class="field"><label for="comInicio">Data inicial</label><input type="date" id="comInicio"></div><div class="field"><label for="comFim">Data final</label><input type="date" id="comFim"></div><button type="button" class="btn" id="comAtualizar">Consultar comissões</button></div><p id="comRealMsg" class="notice" role="status"></p><div id="comRealCards" class="cards"></div><p class="notice">O desconto manual é apenas uma simulação do fechamento nesta tela. Não altera o Caixa nem marca o vale como quitado.</p></div></section>
+</main></div>
+<div class="modal-wrap" id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><h2 id="modalTitle">Novo agendamento</h2><form id="bookingForm"><div class="full"><label for="clienteNome">Nome do cliente</label><input id="clienteNome" required maxlength="120"></div><div class="full"><label for="clienteTelefone">WhatsApp</label><input id="clienteTelefone" required maxlength="30" inputmode="tel"></div><div><label for="bookingProf">Profissional</label><select id="bookingProf" required></select></div><div><label for="bookingServico">Serviço</label><select id="bookingServico" required></select></div><div><label for="bookingDate">Data</label><input type="date" id="bookingDate" required></div><div><label for="bookingTime">Início</label><input id="bookingTime" type="time" step="60" required><label for="bookingEnd">Término</label><input id="bookingEnd" type="time" step="60" required></div><p class="notice full" id="bookingMsg" role="status"></p><div class="footer full"><button type="button" class="btn alt" id="cancelModal">Cancelar</button><button type="submit" class="btn" id="salvar">Confirmar agendamento</button></div></form></div></div>
+<div class="modal-wrap" id="paymentModal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle"><div class="modal"><h2 id="paymentTitle">Receber cliente</h2><p id="paymentClient"></p><p id="paymentService" class="notice"></p><form id="paymentForm" style="display:grid;gap:12px"><div><label for="paymentValue">Valor recebido (R$)</label><input type="number" id="paymentValue" step="0.01" min="0.01" required></div><div><label>Produtos vendidos (opcional)</label><div id="paymentProducts"></div><button id="addPaymentProduct" class="btn alt" type="button">+ Adicionar produto</button></div><p class="notice" id="paymentTotal"></p><div><label for="paymentMethod">Forma de pagamento</label><select id="paymentMethod"><option value="pix">Pix</option><option value="dinheiro">Dinheiro</option><option value="debito">Cartão de débito</option><option value="credito">Cartão de crédito</option></select></div><p id="paymentMsg" class="notice" role="status"></p><div class="cash-modal-actions"><button class="btn alt" type="button" id="paymentCancel">Cancelar</button><button class="btn" type="submit" id="paymentSave">Confirmar recebimento</button></div></form></div></div>
+<div class="modal-wrap" id="manageBookingModal" role="dialog" aria-modal="true" aria-labelledby="manageBookingTitle"><div class="modal"><h2 id="manageBookingTitle">Gerenciar agendamento</h2><p id="manageBookingInfo" class="notice"></p><form id="manageBookingForm" style="display:grid;gap:12px"><div><label for="manageBookingDate">Nova data</label><input type="date" id="manageBookingDate" required></div><div><label for="manageBookingTime">Novo início</label><input id="manageBookingTime" type="time" step="60" required><label for="manageBookingEnd">Novo término</label><input id="manageBookingEnd" type="time" step="60" required></div><p id="manageBookingMsg" class="notice" role="status"></p><div class="cash-modal-actions"><button type="button" class="btn alt" id="manageBookingClose">Fechar</button><button type="button" class="btn alt" id="manageBookingCancel">Cancelar agendamento</button><button type="button" class="btn alt" id="manageBookingReceive">Receber pagamento</button><button type="submit" class="btn" id="manageBookingSave">Salvar remarcação</button></div></form></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 'use strict';
 const SUPABASE_URL='https://urfeqeoqkpgzuyulklnk.supabase.co';
 const SUPABASE_KEY='sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD';
-const $=id=>document.getElementById(id);let db,professional=null,bookings=[],services=[],editing=null,paymentIds=new Set(),paymentReadable=false,blocks=[],blockEnabled=true,choiceHour="";
-const pad=n=>String(n).padStart(2,'0');const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-function today(){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
-function time(iso){return new Date(iso).toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false})}
-function minutes(h){const [a,b]=h.split(':').map(Number);return a*60+b}function hh(m){return `${pad(Math.floor(m/60))}:${pad(m%60)}`}
-function plusDate(date,n){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);return fmt(d)}
-function duration(s){const n=(s?.nome||'').toLowerCase();return n.includes('cabelo')&&n.includes('barba')?60:n.includes('corte')||n.includes('barba')?40:30}
-function isCancelled(b){return String(b.status||'').toLowerCase().startsWith('cancel')}
-function workingHours(date){const day=new Date(date+'T12:00:00').getDay();if(day===0||day===1)return null;return day===6?[8*60,18*60]:[9*60,20*60]}
-function range(date,h,dur){return {start:new Date(`${date}T${h}:00-03:00`).getTime(),end:new Date(`${date}T${h}:00-03:00`).getTime()+dur*60000}}
-function overlaps(a,b){return a.start<b.end&&b.start<a.end}
-function busy(date,h,dur,exceptId=null){const r=range(date,h,dur);return bookings.some(b=>!isCancelled(b)&&b.id!==exceptId&&overlaps(r,{start:new Date(b.inicio).getTime(),end:new Date(b.fim).getTime()}))}
-function showError(s){$('loginMessage').textContent=s;$('login').style.display='block';$('portal').style.display='none'}
-function status(s,bad=false){$('status').textContent=s;$('status').className=bad?'error':'status'}
-async function init(){const {data,error}=await db.auth.getUser();if(error||!data?.user){showError('');return}const {data:link,error:le}=await db.from('colaboradores_acessos').select('profissional_id').eq('usuario_id',data.user.id).maybeSingle();if(le||!link){showError(le?'Erro ao verificar vínculo: '+le.message:'Sua conta não está vinculada a um profissional.');return}const {data:p,error:pe}=await db.from('profissionais').select('id,nome').eq('id',link.profissional_id).single();if(pe||!p){showError('Erro ao carregar profissional: '+(pe?.message||'Cadastro não encontrado'));return}professional=p;$('greeting').textContent=p.nome;$('proChip').textContent='✂ '+p.nome;$('proColumn').textContent=p.nome;$('login').style.display='none';$('portal').style.display='block';$('date').value=today();await load()}
-async function fetchBookings(date){const end=plusDate(date,1);return db.from('agendamentos').select('id,cliente_nome,cliente_telefone,profissional_id,servico_id,inicio,fim,status').eq('profissional_id',professional.id).gte('inicio',date+'T00:00:00-03:00').lt('inicio',end+'T00:00:00-03:00').order('inicio')}
-async function loadBlocks(date){const {data,error}=await db.from('bloqueios_agenda').select('id,profissional_id,inicio,fim,motivo').eq('profissional_id',professional.id).gte('inicio',date+'T00:00:00-03:00').lt('inicio',plusDate(date,1)+'T00:00:00-03:00');if(error){blockEnabled=false;blocks=[];return}blockEnabled=true;blocks=data||[]}
-async function load(){if(!professional)return;const date=$('date').value;if(!date)return;status('Carregando...');try{const [r,s]=await Promise.all([fetchBookings(date),db.from('servicos').select('id,nome')]);if(r.error)throw r.error;bookings=r.data||[];if(s.error)throw s.error;services=s.data||[];paymentIds=new Set();paymentReadable=false;const ids=bookings.map(b=>b.id);if(ids.length){const pay=await db.from('caixa_movimentos').select('agendamento_id').eq('tipo','pagamento').eq('estornado',false).in('agendamento_id',ids);if(!pay.error){paymentReadable=true;paymentIds=new Set((pay.data||[]).map(x=>x.agendamento_id));}}else{paymentReadable=true;}await loadBlocks(date);render();status(blockEnabled?'Agenda atualizada.':'Agenda atualizada. Para ativar bloqueios, instale o SQL fornecido.')}catch(e){status('Erro ao consultar agenda: '+e.message,true)}}
-function render(){const active=bookings.filter(b=>!isCancelled(b));const total=active.reduce((n,b)=>n+Math.max(0,(new Date(b.fim)-new Date(b.inicio))/60000),0);$('kpis').replaceChildren();[['Agendamentos',active.length],['Cancelados',bookings.length-active.length],['Minutos agendados',Math.round(total)]].forEach(([k,v])=>{const d=document.createElement('div');d.className='kpi';const a=document.createElement('div');a.className='sub';a.textContent=k;const b=document.createElement('strong');b.textContent=v;d.append(a,b);$('kpis').append(d)});
-const list=$('bookings');list.replaceChildren();if(!bookings.length){const p=document.createElement('p');p.className='sub';p.textContent='Nenhum atendimento nesta data.';list.append(p)}for(const b of bookings){const d=document.createElement('div');d.className='appt';const left=document.createElement('div');const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';const desc=document.createElement('small');desc.textContent=`${time(b.inicio)}–${time(b.fim)} • ${services.find(s=>s.id===b.servico_id)?.nome||'Serviço'} • ${b.status||'Agendado'} • ${b.cliente_telefone||''}`;left.append(name,desc);const actions=document.createElement('div');actions.className='row';const edit=document.createElement('button');edit.textContent='Remarcar / editar';edit.className='secondary';edit.onclick=()=>openEditor(b);actions.append(edit);if(!isCancelled(b)){const cancel=document.createElement('button');cancel.textContent='Cancelar';cancel.onclick=()=>cancelBooking(b);actions.append(cancel)}d.append(left,actions);list.append(d)}
-const slots=$('slots');slots.replaceChildren();const date=$('date').value;const wh=workingHours(date);if(!wh){slots.textContent='Sem expediente neste dia.';return}
-// Cada intervalo de 20 minutos ocupa 56px; atendimentos são blocos sobrepostos às linhas.
-const pxPerMinute=56/20, totalHeight=(wh[1]-wh[0])*pxPerMinute;
-slots.className='visual-timeline';slots.style.height=totalHeight+'px';
-const hours=document.createElement('div');hours.className='visual-hours';
-const track=document.createElement('div');track.className='visual-track';
-slots.append(hours,track);
-const dayStart=range(date,hh(wh[0]),20).start;
-const activeBookings=bookings.filter(b=>!isCancelled(b));
-for(let m=wh[0];m<=wh[1];m+=20){
- const y=(m-wh[0])*pxPerMinute,major=m%60===0;
- const rule=document.createElement('div');rule.className='visual-rule'+(major?' major':'');rule.style.top=y+'px';track.append(rule);
- if(m<wh[1]){
-  const label=document.createElement('div');label.className='visual-hour'+(major?' major':'');label.style.top=(y+(major?13:28))+'px';label.textContent=hh(m);hours.append(label);
-  const h=hh(m),startMs=dayStart+(m-wh[0])*60000,endMs=startMs+20*60000;
-  const occupied=activeBookings.some(b=>new Date(b.inicio).getTime()<endMs&&new Date(b.fim).getTime()>startMs)||blocks.some(b=>new Date(b.inicio).getTime()<endMs&&new Date(b.fim).getTime()>startMs);
-  if(!occupied){const free=document.createElement('button');free.type='button';free.className='visual-free';free.style.top=y+'px';free.textContent='+ Agendar';free.setAttribute('aria-label','Agendar às '+h);free.onclick=()=>openChoice(h);track.append(free)}
- }
-}
-for(const [index,b] of activeBookings.entries()){
- const startMs=new Date(b.inicio).getTime(),endMs=new Date(b.fim).getTime();
- const top=Math.max(0,(startMs-dayStart)/60000*pxPerMinute);
- const bottom=Math.min(totalHeight,(endMs-dayStart)/60000*pxPerMinute);
- if(bottom<=top)continue;
- const block=document.createElement('button');block.type='button';
- const paid=paymentIds.has(b.id),height=bottom-top;
- block.className='visual-booking'+(index%2?' alt':'')+(paid?' paid':'')+(height<90?' compact':'')+(height<47?' tiny':'');
- block.style.top=(top+2)+'px';block.style.height=Math.max(20,height-4)+'px';
- block.onclick=()=>openEditor(b);
- const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';
- const detail=document.createElement('span');detail.className='booking-detail';
- detail.textContent=(services.find(x=>String(x.id)===String(b.servico_id))?.nome||'Serviço')+' • '+time(b.inicio)+'–'+time(b.fim);
- const pay=document.createElement('span');pay.className='pay-tag '+(paid?'is-paid':paymentReadable?'is-pending':'is-unknown');
- pay.textContent=paid?'✓ Pago':paymentReadable?'Pendente':'Pagamento não verificado';
- block.append(name,detail,pay);block.title=name.textContent+' | '+detail.textContent+' | '+pay.textContent;
- track.append(block);
-}
-for(const b of blocks){const top=Math.max(0,(new Date(b.inicio).getTime()-dayStart)/60000*pxPerMinute),bottom=Math.min(totalHeight,(new Date(b.fim).getTime()-dayStart)/60000*pxPerMinute);if(bottom<=top)continue;const el=document.createElement('button');el.className='visual-booking visual-block';el.style.top=(top+2)+'px';el.style.height=Math.max(20,bottom-top-4)+'px';const title=document.createElement('b');title.textContent='🔒 '+(b.motivo||'Bloqueado');const detail=document.createElement('span');detail.className='booking-detail';detail.textContent=time(b.inicio)+'–'+time(b.fim)+' · Toque para remover';el.append(title,detail);el.onclick=()=>removeBlock(b);track.append(el)}
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const state={professionals:[],services:[],bookings:[],allBookings:[],date:'',view:'agenda',payments:[],products:[]};
+const formatDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today=()=>formatDate(new Date());
+const localDate=(iso)=>new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const localTime=(iso)=>new Date(iso).toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false});
+const minutes=iso=>{const [h,m]=localTime(iso).split(':').map(Number);return h*60+m};
+const cancelled=s=>String(s||'').toLowerCase().startsWith('cancel');
+function setStatus(t,isError=false){$('status').textContent=t;$('status').style.color=isError?'#ff9ba0':'#bfc1c9'}
+async function checkAdmin(){const {data:{user},error}=await db.auth.getUser();if(error||!user)return false;const r=await db.from('administradores').select('usuario_id').eq('usuario_id',user.id).limit(1);if(r.error){$('loginMsg').textContent='Não foi possível verificar seu acesso administrativo: '+r.error.message;return false}return !!r.data?.length}
+async function enter(){if(!await checkAdmin()){await db.auth.signOut();$('loginMsg').textContent ||= 'Esta conta não está autorizada como administradora.';return} $('loginWrap').style.display='none';$('app').style.display='block';state.date=today();$('dataAgenda').value=state.date;await loadBase();await loadAgenda();}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginMsg').textContent='Verificando acesso...';const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('senha').value});if(error){$('loginMsg').textContent='Não foi possível entrar. Confira seu e-mail e senha.';return}$('loginMsg').textContent='';await enter()});
+$('sair').addEventListener('click',async()=>{await db.auth.signOut();location.reload()});
+async function loadBase(){const [p,s]=await Promise.all([db.from('profissionais').select('id,nome,ativo,foto_url').eq('ativo',true).order('nome'),db.from('servicos').select('id,nome,duracao_minutos,ativo,preco').eq('ativo',true).order('nome')]);if(p.error)setStatus('Erro ao carregar profissionais: '+p.error.message,true);else state.professionals=p.data||[];if(s.error)setStatus('Não foi possível carregar serviços: '+s.error.message,true);else state.services=s.data||[];renderProfessionals();fillSelects();fillComissoes();await loadServicesAdmin()}
+function fillSelects(){const prof=$('bookingProf'),serv=$('bookingServico');prof.replaceChildren(new Option('Selecione',''));serv.replaceChildren(new Option('Selecione',''));state.professionals.forEach(p=>prof.add(new Option(p.nome,p.id)));state.services.forEach(s=>serv.add(new Option(`${s.nome} • ${s.duracao_minutos} min`,s.id)))}
+function renderProfessionals(){
+ const root=$('profCards');root.replaceChildren();
+ state.professionals.forEach(p=>{
+  const card=document.createElement('div');card.className='person';
+  if(p.foto_url){const img=document.createElement('img');img.className='prof-photo';img.src=p.foto_url;img.alt='Foto de '+p.nome;img.loading='lazy';card.append(img)}
+  else {const placeholder=document.createElement('div');placeholder.className='prof-photo prof-photo-placeholder';placeholder.textContent='✂';card.append(placeholder)}
+  const name=document.createElement('b');name.textContent=p.nome;card.append(name);
+  const status=document.createElement('div');status.className='pill';status.textContent='Ativo';card.append(document.createElement('br'),status);
+  const actions=document.createElement('div');actions.className='prof-actions';
+  const label=document.createElement('label');label.className='btn';label.style.cssText='cursor:pointer;color:white;margin:0';label.textContent=p.foto_url?'Trocar foto':'Adicionar foto';
+  const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.setAttribute('aria-label','Selecionar foto de '+p.nome);label.append(input);actions.append(label);card.append(actions);
+  const feedback=document.createElement('div');feedback.className='prof-feedback';feedback.setAttribute('role','status');card.append(feedback);
+  input.addEventListener('change',async()=>{
+   const file=input.files?.[0];if(!file)return;
+   if(!['image/jpeg','image/png','image/webp'].includes(file.type)){feedback.textContent='Escolha JPG, PNG ou WEBP.';input.value='';return}
+   if(file.size>5*1024*1024){feedback.textContent='A foto deve ter até 5 MB.';input.value='';return}
+   input.disabled=true;feedback.textContent='Enviando foto...';
+   try{
+    const extension={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
+    const path=`${p.id}/${crypto.randomUUID()}.${extension}`;
+    const uploaded=await db.storage.from('fotos-profissionais').upload(path,file,{contentType:file.type,upsert:false});
+    if(uploaded.error)throw uploaded.error;
+    const {data:publicUrl}=db.storage.from('fotos-profissionais').getPublicUrl(path);
+    const updated=await db.from('profissionais').update({foto_url:publicUrl.publicUrl}).eq('id',p.id).select('id,foto_url');
+    if(updated.error)throw updated.error;
+    if(!updated.data?.length)throw new Error('O banco não confirmou a atualização. Verifique a permissão de edição da tabela profissionais.');
+    p.foto_url=publicUrl.publicUrl;renderProfessionals();
+   }catch(err){feedback.textContent='Erro: '+(err.message||String(err))}
+   finally{input.disabled=false;input.value=''}
+  });
+  root.append(card);
+ });
 }
 
-function openChoice(h){choiceHour=h;$('choiceTitle').textContent='Horário livre · '+h;$('choice').style.display='block';$('editor').style.display='none';$('blockEditor').style.display='none';$('choice').scrollIntoView({behavior:'smooth',block:'start'})}
-async function removeBlock(b){if(!confirm('Remover bloqueio de '+time(b.inicio)+' até '+time(b.fim)+'?'))return;const {error}=await db.from('bloqueios_agenda').delete().eq('id',b.id).eq('profissional_id',professional.id);if(error){status('Não foi possível remover o bloqueio: '+error.message,true);return}await load()}
-function fillTimes(date,selected='',exceptId=null){
- const start=$('bookingTime');start.value=selected||'09:00';
- const service=services.find(s=>String(s.id)===$('service').value);
- if(!editing || !selected){const end=minutes(start.value)+duration(service);$('bookingEnd').value=hh(Math.min(end,1439));}
+function fillComissoes(){}
+const brl=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n);
+function timeBounds(date){const day=new Date(date+'T12:00:00').getDay();return day===0||day===1?null:{start:day===6?480:540,end:day===6?1080:1200}}
+async function loadAgenda(){state.date=$('dataAgenda').value;if(!state.date)return;const b=timeBounds(state.date);$('diaLabel').textContent=new Date(state.date+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});setStatus('Carregando agenda...');const {data,error}=await db.from('agendamentos').select('id,cliente_nome,cliente_telefone,profissional_id,servico_id,inicio,fim,status').gte('inicio',state.date+'T00:00:00-03:00').lt('inicio',state.date+'T23:59:59-03:00').order('inicio');if(error){setStatus('Erro ao carregar agenda: '+error.message,true);return}state.bookings=data||[];await loadPaymentMarks();renderAgenda(b);setStatus('Agenda atualizada.')}
+function kpi(label,value){const e=document.createElement('div');e.className='kpi';const a=document.createElement('span');a.className='muted';a.textContent=label;const b=document.createElement('strong');b.textContent=value;e.append(a,b);return e}
+function renderOcupacao(){const root=$('ocupacaoEquipe');root.replaceChildren();const bounds=timeBounds(state.date);for(const p of state.professionals){const card=document.createElement('div');card.className='person';const heading=document.createElement('b');heading.textContent=p.nome;card.append(heading);if(!bounds){const t=document.createElement('p');t.className='muted';t.textContent='Sem expediente neste dia';card.append(t);root.append(card);continue;}const intervals=state.bookings.filter(x=>x.profissional_id===p.id&&!cancelled(x.status)).map(x=>[Math.max(bounds.start,minutes(x.inicio)),Math.min(bounds.end,minutes(x.fim))]).filter(([a,b])=>b>a).sort((a,b)=>a[0]-b[0]);let occupied=0,end=bounds.start;for(const [a,b] of intervals){occupied+=Math.max(0,b-Math.max(a,end));end=Math.max(end,b)}const pct=Math.min(100,Math.round(100*occupied/(bounds.end-bounds.start)));const t=document.createElement('p');t.className='muted';t.textContent=`${pct}% ocupado • ${occupied} min agendados`;const track=document.createElement('div');track.style.cssText='height:11px;background:#363842;border-radius:20px;overflow:hidden';const bar=document.createElement('div');bar.style.cssText=`width:${pct}%;height:100%;background:#e02832`;track.append(bar);card.append(t,track);root.append(card)}}
+function renderKpis(){const total=state.bookings.filter(x=>!cancelled(x.status)).length;const occ=state.professionals.filter(p=>state.bookings.some(x=>x.profissional_id===p.id&&!cancelled(x.status))).length;for(const id of ['kpisInicio','kpisRelatorios']){$(id).replaceChildren(kpi('Agendamentos do dia',total),kpi('Profissionais com agenda',occ),kpi('Profissionais ativos',state.professionals.length))}}
+function renderAgenda(bounds){
+ renderKpis();renderOcupacao();const root=$('schedule');root.replaceChildren();
+ const ordered=[...state.professionals].sort((a,b)=>{const rank=n=>{const t=String(n||'').toLowerCase();return t.includes('luis')||t.includes('luís')?0:t.includes('carol')?1:t.includes('juninho')?2:t.includes('gustavo')?3:4};return rank(a.nome)-rank(b.nome)});
+ root.style.setProperty('--professional-count',ordered.length);
+ const corner=document.createElement('div');corner.className='headcell time-heading';corner.textContent='Horário';root.append(corner);
+ ordered.forEach(p=>{const head=document.createElement('div');head.className='headcell prof-head';if(p.foto_url){const img=document.createElement('img');img.src=p.foto_url;img.alt='';head.append(img)}else{const icon=document.createElement('span');icon.className='prof-initial';icon.textContent='✂';head.append(icon)}const details=document.createElement('div');details.className='prof-head-details';const name=document.createElement('strong');name.textContent=p.nome;const count=document.createElement('small');const total=state.bookings.filter(x=>String(x.profissional_id)===String(p.id)&&!cancelled(x.status)).length;count.textContent=total+' agendamento'+(total===1?'':'s');details.append(name,count);head.append(details);root.append(head)});
+ if(!ordered.length){root.append(cell('Nenhum profissional encontrado.','empty'));return}
+ if(!bounds){root.append(cell('Barbearia fechada nesta data.','empty'));return}
+ const px=2.4,height=(bounds.end-bounds.start)*px;
+ const time=document.createElement('div');time.className='timecol';time.style.height=height+'px';
+ for(let m=bounds.start;m<=bounds.end;m+=20){const lab=document.createElement('div');lab.className='time-label';lab.style.top=((m-bounds.start)*px)+'px';lab.textContent=clock(m);if(m%60===0)lab.classList.add('hour-label');time.append(lab)}root.append(time);
+ ordered.forEach((p,idx)=>{const col=document.createElement('div');col.className='procol';col.style.height=height+'px';
+ for(let m=bounds.start;m<bounds.end;m+=20){const slotStart=new Date(`${state.date}T${clock(m)}:00-03:00`);if(slotStart<new Date())continue;const occupied=state.bookings.some(x=>String(x.profissional_id)===String(p.id)&&!cancelled(x.status)&&slotStart>=new Date(x.inicio)&&slotStart<new Date(x.fim));if(occupied)continue;const free=document.createElement('button');free.type='button';free.className='free-slot';free.style.top=((m-bounds.start)*px)+'px';free.style.height=(20*px-1)+'px';free.textContent='+ '+clock(m);free.title=`Agendar com ${p.nome} às ${clock(m)}`;free.setAttribute('aria-label',free.title);free.addEventListener('click',()=>openModalAt(p.id,clock(m)));col.append(free)}
+ state.bookings.filter(x=>String(x.profissional_id)===String(p.id)).forEach(x=>{const start=Math.max(minutes(x.inicio),bounds.start),end=Math.min(minutes(x.fim),bounds.end);if(end<=start)return;const el=document.createElement('div');const paid=state.payments.some(y=>y.agendamento_id===x.id);el.className='booking booking-color-'+(idx%6)+(cancelled(x.status)?' cancel':'')+(paid?' paid':'');el.style.top=((start-bounds.start)*px+2)+'px';el.style.height=Math.max(25,(end-start)*px-4)+'px';const name=document.createElement('strong');name.textContent=x.cliente_nome||'Cliente';const svc=state.services.find(s=>String(s.id)===String(x.servico_id));const service=document.createElement('span');service.className='booking-service';service.textContent=svc?.nome||'Atendimento';const timeText=document.createElement('small');timeText.textContent=`${localTime(x.inicio)} – ${localTime(x.fim)}`;const status=document.createElement('span');status.className='booking-status';status.textContent=paid?'✓ Pago':(x.status||'Agendado');el.append(name,service,timeText,status);if(cancelled(x.status)){el.style.pointerEvents='none'}else{el.addEventListener('click',()=>openManageBooking(x))}el.title=`${x.cliente_nome} • ${x.status}`;col.append(el)});root.append(col)});
 }
-function openEditor(b=null,h=''){editing=b;$('editorTitle').textContent=b?'Editar / remarcar atendimento':'Novo agendamento';$('clientName').value=b?.cliente_nome||'';$('clientPhone').value=b?.cliente_telefone||'';$('bookingDate').value=b?new Date(b.inicio).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}):$('date').value;$('bookingStatus').value=b?.status&&['agendado','confirmado','cancelado'].includes(b.status)?b.status:'agendado';$('service').replaceChildren();for(const s of services)$('service').add(new Option(s.nome,s.id));if(b)$('service').value=b.servico_id;fillTimes($('bookingDate').value,b?time(b.inicio):h,b?.id);if(b)$('bookingEnd').value=time(b.fim);$('editorMessage').textContent='';$('editor').style.display='block';$('editor').scrollIntoView({behavior:'smooth',block:'start'})}
-async function cancelBooking(b){if(!confirm('Cancelar o atendimento de '+b.cliente_nome+'?'))return;const {error}=await db.from('agendamentos').update({status:'cancelado'}).eq('id',b.id).eq('profissional_id',professional.id);if(error){status('Não foi possível cancelar: '+error.message,true);return}await load()}
-$('bookingForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('saveBooking');btn.disabled=true;$('editorMessage').textContent='';try{const date=$('bookingDate').value,h=$('bookingTime').value,s=services.find(x=>String(x.id)===$('service').value);if(!s||!h)throw Error('Escolha um serviço e horário disponíveis.');const endH=$('bookingEnd').value,wh=workingHours(date);if(!endH||minutes(endH)<=minutes(h))throw Error('O término precisa ser depois do início.');if(!wh||minutes(h)<wh[0]||minutes(endH)>wh[1])throw Error('Horário fora do expediente.');const r=await fetchBookings(date);if(r.error)throw r.error;const all=r.data||[];const span=range(date,h,minutes(endH)-minutes(h));if(all.some(b=>!isCancelled(b)&&b.id!==editing?.id&&overlaps(span,{start:new Date(b.inicio).getTime(),end:new Date(b.fim).getTime()})))throw Error('Este horário já está ocupado. Atualize a agenda.');await loadBlocks(date);if(blocks.some(b=>overlaps(span,{start:new Date(b.inicio).getTime(),end:new Date(b.fim).getTime()})))throw Error('Este horário está bloqueado.');const payload={cliente_nome:$('clientName').value.trim(),cliente_telefone:$('clientPhone').value.trim(),profissional_id:professional.id,servico_id:s.id,inicio:new Date(span.start).toISOString(),fim:new Date(span.end).toISOString(),status:$('bookingStatus').value};if(!payload.cliente_nome)throw Error('Informe o nome do cliente.');const result=editing?await db.from('agendamentos').update(payload).eq('id',editing.id).eq('profissional_id',professional.id):await db.from('agendamentos').insert(payload);if(result.error)throw result.error;$('editor').style.display='none';$('date').value=date;await load();status(editing?'Atendimento atualizado.':'Agendamento criado.')}catch(err){$('editorMessage').textContent='Não foi possível salvar: '+err.message}finally{btn.disabled=false}});
-$('blockForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('saveBlock');btn.disabled=true;$('blockMsg').textContent='';try{if(!blockEnabled)throw Error('Instale primeiro o SQL dos bloqueios no Supabase.');const date=$('blockDate').value,h=$('blockStart').value,endH=$('blockEnd').value,wh=workingHours(date);if(!wh||minutes(h)<wh[0]||minutes(endH)>wh[1]||minutes(endH)<=minutes(h))throw Error('Informe início e término válidos dentro do expediente.');const span=range(date,h,minutes(endH)-minutes(h));const r=await fetchBookings(date);if(r.error)throw r.error;if((r.data||[]).some(b=>!isCancelled(b)&&overlaps(span,{start:new Date(b.inicio).getTime(),end:new Date(b.fim).getTime()})))throw Error('Existe um cliente agendado nesse período.');await loadBlocks(date);if(blocks.some(b=>overlaps(span,{start:new Date(b.inicio).getTime(),end:new Date(b.fim).getTime()})))throw Error('Já existe um bloqueio nesse período.');const {error}=await db.from('bloqueios_agenda').insert({profissional_id:professional.id,inicio:new Date(span.start).toISOString(),fim:new Date(span.end).toISOString(),motivo:$('blockReason').value});if(error)throw error;$('blockEditor').style.display='none';$('date').value=date;await load();status('Horário bloqueado com sucesso.')}catch(err){$('blockMsg').textContent='Não foi possível bloquear: '+err.message}finally{btn.disabled=false}});
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginButton').disabled=true;$('loginMessage').textContent='Entrando...';try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await init()}catch(err){showError('Não foi possível entrar: '+err.message)}finally{$('loginButton').disabled=false}});
-$('logout').onclick=async()=>{await db.auth.signOut();professional=null;showError('');$('password').value=''};$('date').onchange=load;$('refresh').onclick=load;$('today').onclick=()=>{$('date').value=today();load()};$('prev').onclick=()=>{$('date').value=plusDate($('date').value,-1);load()};$('next').onclick=()=>{$('date').value=plusDate($('date').value,1);load()};$('newBooking').onclick=()=>openEditor();$('choiceBooking').onclick=()=>{$('choice').style.display='none';openEditor(null,choiceHour)};$('choiceBlock').onclick=()=>{$('choice').style.display='none';$('blockDate').value=$('date').value;$('blockStart').value=choiceHour;$('blockEnd').value=hh(Math.min(minutes(choiceHour)+60,workingHours($('date').value)?.[1]||1200));$('blockMsg').textContent='';$('blockEditor').style.display='block';$('blockEditor').scrollIntoView({behavior:'smooth',block:'start'})};$('choiceClose').onclick=()=>{$('choice').style.display='none'};$('closeBlock').onclick=()=>{$('blockEditor').style.display='none'};$('closeEditor').onclick=()=>{$('editor').style.display='none'};$('service').onchange=()=>{};$('bookingDate').onchange=()=>{};document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));$('agendaView').style.display=b.dataset.tab==='agenda'?'block':'none';$('resumoView').style.display=b.dataset.tab==='resumo'?'block':'none';if(b.dataset.tab==='resumo')loadCommissions()});
-
-const money=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-async function loadServiceHistory(start,end){
- const area=$('performance');area.replaceChildren();
- const {data,error}=await db.rpc('historico_recebimentos_talento',{p_inicio:start,p_fim:end});
- if(error){area.textContent='Para mostrar os pagamentos reais, instale primeiro o SQL da Etapa 2 no Supabase. Detalhes: '+error.message;return}
- const rows=data||[];
- const header=document.createElement('p');header.className='sub';
- const total=rows.reduce((sum,x)=>sum+Number(x.valor_recebido||0),0);
- header.textContent=rows.length+' atendimento(s) recebido(s) • Total serviços: '+money(total)+' • Comissão de serviços (50%): '+money(total*.5);
- area.append(header);
- if(!rows.length){const p=document.createElement('p');p.className='sub';p.textContent='Nenhum serviço pago neste período.';area.append(p);return}
- for(const x of rows){
-  const el=document.createElement('div');el.className='appt';
-  const left=document.createElement('div');
-  const name=document.createElement('b');name.textContent=x.cliente_nome||'Cliente';
-  const detail=document.createElement('small');
-  detail.textContent=new Date(x.pago_em).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'})+' • '+(x.servico_nome||'Serviço')+' • '+(x.forma||'Pagamento');
-  left.append(name,detail);
-  const right=document.createElement('div');right.style.textAlign='right';
-  const price=document.createElement('b');price.textContent=money(x.valor_recebido);
-  const note=document.createElement('small');note.textContent='Comissão: '+money(x.comissao_servico);
-  right.append(price,note);el.append(left,right);area.append(el);
+function cell(t,cl){const e=document.createElement('div');e.className=cl;e.textContent=t;return e}
+function clock(m){return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`}
+function showView(name){state.view=name;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id==='view-'+name));document.querySelectorAll('[data-view]').forEach(e=>e.classList.toggle('active',e.dataset.view===name));$('pageTitle').textContent=({inicio:'Início',agenda:'Agenda',servicos:'Serviços e preços',profissionais:'Profissionais',clientes:'Clientes',caixa:'Caixa',relatorios:'Relatórios',lembretes:'Lembretes',gestao:'Gestão da agenda',pacotes:'Pacotes de clientes',produtos:'Produtos',financeiro:'Financeiro',comissoes:'Comissões',desempenho:'Desempenho da equipe'})[name];if(name==='caixa'||name==='financeiro')loadCash();if(name==='produtos')loadProducts();if(name==='comissoes')loadRealCommissions();if(name==='clientes')loadClients();if(name==='servicos')loadServicesAdmin();if(name==='inicio'||name==='relatorios')renderKpis();if(name==='desempenho')renderOcupacao()}
+function toggleMobileMenu(open){document.querySelector('.sidebar').classList.toggle('open',open);$('mobileShade').classList.toggle('show',open);$('mobileMenuButton').setAttribute('aria-expanded',String(open));}
+$('mobileMenuButton').addEventListener('click',()=>toggleMobileMenu(!document.querySelector('.sidebar').classList.contains('open')));
+$('mobileShade').addEventListener('click',()=>toggleMobileMenu(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleMobileMenu(false)});
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{showView(b.dataset.view);toggleMobileMenu(false)}));document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));function moveAgendaDay(delta){const d=new Date(($('dataAgenda').value||today())+'T12:00:00');d.setDate(d.getDate()+delta);$('dataAgenda').value=formatDate(d);loadAgenda()}$('diaAnterior').addEventListener('click',()=>moveAgendaDay(-1));$('diaSeguinte').addEventListener('click',()=>moveAgendaDay(1));$('dataAgenda').addEventListener('change',loadAgenda);$('hoje').addEventListener('click',()=>{$('dataAgenda').value=today();loadAgenda()});$('refresh').addEventListener('click',async()=>{await loadBase();await loadAgenda();if(state.view==='caixa'||state.view==='financeiro')await loadCash()});
+async function loadClients(){const body=$('clientesBody');body.replaceChildren();const {data,error}=await db.from('agendamentos').select('cliente_nome,cliente_telefone,inicio').order('inicio',{ascending:false}).limit(500);if(error){body.append(row([`Erro: ${error.message}`,'','']));return}const seen=new Set();(data||[]).forEach(a=>{const key=(a.cliente_telefone||'')+'|'+(a.cliente_nome||'');if(seen.has(key))return;seen.add(key);body.append(row([a.cliente_nome||'',a.cliente_telefone||'',localDate(a.inicio)]))});if(!seen.size)body.append(row(['Nenhum cliente encontrado','','']))}
+function row(values){const tr=document.createElement('tr');values.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});return tr}
+let selectedGridTime=null;
+function openModal(){selectedGridTime=null;$('bookingForm').reset();$('bookingDate').value=state.date||today();$('bookingMsg').textContent='';$('modalWrap').style.display='flex';$('bookingTime').value='';$('bookingEnd').value=''}
+async function openModalAt(professionalId,time){openModal();selectedGridTime=time;$('bookingProf').value=professionalId;$('bookingDate').value=state.date;$('bookingMsg').textContent='Horário escolhido: '+time+'. Selecione o serviço para confirmar a disponibilidade.';await updateTimes();$('clienteNome').focus()}
+function closeModal(){selectedGridTime=null;$('modalWrap').style.display='none'}$('novo').addEventListener('click',()=>{openModal();updateTimes()});$('cancelModal').addEventListener('click',closeModal);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});
+async function updateTimes(){
+ const date=$('bookingDate').value,svc=state.services.find(x=>String(x.id)===String($('bookingServico').value));
+ if(selectedGridTime)$('bookingTime').value=selectedGridTime;
+ if(!$('bookingTime').value)$('bookingTime').value=timeBounds(date)?clock(timeBounds(date).start):'09:00';
+ if(svc && !$('bookingEnd').value){
+  const [h,m]=$('bookingTime').value.split(':').map(Number);
+  $('bookingEnd').value=clock(Math.min(1439,h*60+m+Number(svc.duracao_minutos||40)));
  }
- if(rows.length===500){const p=document.createElement('p');p.className='sub';p.textContent='Mostrando até 500 pagamentos. Consulte um período menor.';area.append(p)}
+ $('bookingMsg').textContent='Defina início e término. O sistema verificará conflitos ao salvar.';
+}
+['bookingDate','bookingProf'].forEach(id=>$(id).addEventListener('change',()=>{selectedGridTime=null;updateTimes()}));$('bookingServico').addEventListener('change',updateTimes);
+$('bookingForm').addEventListener('submit',async e=>{e.preventDefault();const s=state.services.find(x=>x.id===$('bookingServico').value),date=$('bookingDate').value,t=$('bookingTime').value,finish=$('bookingEnd').value;if(!s||!t||!finish)return;const start=new Date(`${date}T${t}:00-03:00`),end=new Date(`${date}T${finish}:00-03:00`);const bounds=timeBounds(date);const [sh,sm]=t.split(':').map(Number),[eh,em]=finish.split(':').map(Number);if(!bounds||sh*60+sm<bounds.start||eh*60+em>bounds.end||end<=start){$('bookingMsg').textContent='Confira o início e término dentro do expediente.';return;}$('salvar').disabled=true;$('bookingMsg').textContent='Verificando disponibilidade...';const check=await db.from('agendamentos').select('inicio,fim,status').eq('profissional_id',$('bookingProf').value).lt('inicio',end.toISOString()).gt('fim',start.toISOString());if(check.error){$('salvar').disabled=false;$('bookingMsg').textContent='Erro ao verificar disponibilidade: '+check.error.message;return}if(start<new Date()||(check.data||[]).some(x=>!cancelled(x.status))){$('salvar').disabled=false;$('bookingMsg').textContent='Este horário não está mais disponível. Escolha outro.';await updateTimes();return}$('bookingMsg').textContent='Salvando...';const {error}=await db.from('agendamentos').insert({cliente_nome:$('clienteNome').value.trim(),cliente_telefone:$('clienteTelefone').value.trim(),profissional_id:$('bookingProf').value,servico_id:s.id,inicio:start.toISOString(),fim:end.toISOString(),status:'Confirmado'});$('salvar').disabled=false;if(error){$('bookingMsg').textContent='Erro ao agendar: '+error.message+'. Se for permissão, será necessário configurar a política de INSERT para administradores.';return}closeModal();$('dataAgenda').value=date;showView('agenda');await loadAgenda();setStatus('Agendamento criado com sucesso!')});
+
+let editingService=null, servicePriceColumn=null, serviceAdminRows=[];
+async function loadServicesAdmin(){
+ const {data,error}=await db.from('servicos').select('*').order('nome');
+ const info=$('serviceInfo'),list=$('serviceList');list.replaceChildren();
+ if(error){$('serviceMessage').textContent='Erro ao consultar serviços: '+error.message;return}
+ serviceAdminRows=data||[];
+ const candidate=['preco','preco_base','valor','valor_padrao'];
+ servicePriceColumn=candidate.find(k=>serviceAdminRows.some(r=>Object.prototype.hasOwnProperty.call(r,k)))||null;
+ $('servicePrice').disabled=!servicePriceColumn;
+ info.textContent=servicePriceColumn?'Preços, serviços e duração são gravados no Supabase.':'Nome e duração podem ser editados. Para ativar os preços, precisamos criar a coluna preco na tabela servicos do Supabase.';
+ for(const item of serviceAdminRows){
+  const row=document.createElement('div');row.className='service-row';
+  const details=document.createElement('div');const title=document.createElement('strong');title.textContent=item.nome||'Serviço';
+  const desc=document.createElement('div');desc.className='service-note';desc.textContent=`${item.duracao_minutos} min • ${servicePriceColumn?brl(Number(item[servicePriceColumn]||0)):'Preço ainda não configurado'} • ${item.ativo===false?'Inativo':'Ativo'}`;
+  details.append(title,desc);const btn=document.createElement('button');btn.type='button';btn.className='btn alt';btn.textContent='Editar';btn.addEventListener('click',()=>{
+   editingService=item.id;$('serviceName').value=item.nome||'';$('serviceDuration').value=item.duracao_minutos||40;$('servicePrice').value=servicePriceColumn?(item[servicePriceColumn]??''):'';$('serviceSave').textContent='Salvar alterações';$('serviceCancelEdit').style.display='inline-block';$('serviceName').focus();
+  });row.append(details,btn);list.append(row);
+ }
+ if(!serviceAdminRows.length)list.textContent='Nenhum serviço cadastrado.';
+}
+function resetServiceForm(){editingService=null;$('serviceForm').reset();$('serviceDuration').value=40;$('serviceSave').textContent='Salvar serviço';$('serviceCancelEdit').style.display='none'}
+$('serviceCancelEdit').addEventListener('click',resetServiceForm);
+$('serviceForm').addEventListener('submit',async e=>{
+ e.preventDefault();const nome=$('serviceName').value.trim(),duracao=Number($('serviceDuration').value);
+ if(!nome||!Number.isInteger(duracao)||duracao<5||duracao>480){$('serviceMessage').textContent='Confira nome e duração.';return}
+ const values={nome,duracao_minutos:duracao};if(servicePriceColumn){const price=$('servicePrice').value;if(price!=='')values[servicePriceColumn]=Number(price)}
+ else if(!editingService)values.ativo=true;
+ const btn=$('serviceSave');btn.disabled=true;$('serviceMessage').textContent='Salvando no Supabase...';
+ const result=editingService?await db.from('servicos').update(values).eq('id',editingService).select('id'):await db.from('servicos').insert(values).select('id');
+ btn.disabled=false;
+ if(result.error){$('serviceMessage').textContent='Não foi possível salvar: '+result.error.message+' (verifique as permissões da tabela servicos).';return}
+ if(!result.data?.length){$('serviceMessage').textContent='O Supabase não confirmou a gravação. Verifique as permissões de edição.';return}
+ resetServiceForm();await loadBase();$('serviceMessage').textContent='Serviço salvo com sucesso!';
+});
+
+
+// Caixa: somente operações confirmadas pelo Supabase aparecem como pagas.
+let paymentBooking=null;
+async function loadPaymentMarks(){
+ const ids=state.bookings.map(x=>x.id);state.payments=[];if(!ids.length)return;
+ const {data,error}=await db.from('caixa_movimentos').select('agendamento_id').eq('tipo','pagamento').eq('estornado',false).in('agendamento_id',ids);
+ if(error){setStatus('Caixa não disponível: '+error.message+' — execute o SQL de instalação.',true);return}
+ state.payments=data||[];
+}
+function openPayment(booking){
+ if(cancelled(booking.status)){alert('Agendamento cancelado: não é possível receber.');return}
+ if(state.payments.some(p=>p.agendamento_id===booking.id)){alert('✓ Este cliente já está marcado como pago. Para corrigir, estorne o pagamento no Caixa.');return}
+ paymentBooking=booking;
+ const svc=state.services.find(s=>String(s.id)===String(booking.servico_id));
+ $('paymentClient').textContent='Cliente: '+(booking.cliente_nome||'Cliente');
+ $('paymentService').textContent='Serviço: '+(svc?.nome||'Não identificado')+' • '+localTime(booking.inicio);
+ $('paymentValue').value=svc?.preco!=null?Number(svc.preco).toFixed(2):'';
+ $('paymentProducts').replaceChildren();$('paymentMethod').value='pix';$('paymentMsg').textContent='';loadProducts().then(updatePaymentTotal);$('paymentModal').style.display='flex';updatePaymentTotal();
+}
+function closePayment(){$('paymentModal').style.display='none';paymentBooking=null}
+$('paymentCancel').addEventListener('click',closePayment);
+$('paymentModal').addEventListener('click',e=>{if(e.target===$('paymentModal'))closePayment()});
+$('paymentForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(!paymentBooking)return;
+ const valor=Number($('paymentValue').value);if(!Number.isFinite(valor)||valor<=0)return;
+ const b=paymentBooking,button=$('paymentSave');button.disabled=true;$('paymentMsg').textContent='Registrando pagamento...';
+ const prof=state.professionals.find(p=>String(p.id)===String(b.profissional_id));
+ const itens=selectedPaymentProducts();if(itens===null){button.disabled=false;return}
+  const {error}=await db.rpc('receber_com_produtos',{p_agendamento_id:b.id,p_profissional_id:b.profissional_id,p_servico_valor:valor,p_forma:$('paymentMethod').value,p_descricao:'Pagamento: '+(b.cliente_nome||'Cliente')+' • '+(prof?.nome||''),p_itens:itens});
+ button.disabled=false;
+ if(error){$('paymentMsg').textContent='Não foi possível registrar: '+error.message;return}
+ closePayment();await loadAgenda();
+});
+function localDayRange(day){return {start:day+'T00:00:00-03:00',end:day+'T23:59:59.999-03:00'}}
+async function loadCash(){
+ const day=$('cashDate').value||today();$('cashDate').value=day;const range=localDayRange(day);
+ const {data,error}=await db.from('caixa_movimentos').select('id,criado_em,tipo,agendamento_id,profissional_id,valor,forma,descricao,estornado').gte('criado_em',range.start).lte('criado_em',range.end).order('criado_em',{ascending:false});
+ if(error){$('cashMsg').textContent='Erro ao carregar caixa: '+error.message;return}
+ $('cashMsg').textContent='';const records=data||[],active=records.filter(x=>!x.estornado);
+ const sum=type=>active.filter(x=>x.tipo===type).reduce((v,x)=>v+Number(x.valor),0);
+ const payments=sum('pagamento'),expenses=sum('despesa'),advances=sum('vale');
+ const renderSummary=(id)=>{const target=$(id);target.replaceChildren();for(const [name,val] of [['Recebimentos',payments],['Despesas',expenses],['Vales / retiradas',advances],['Saldo do dia',payments-expenses-advances]]){const item=document.createElement('div');item.className='cash-stat';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=brl(val);item.append(label,strong);target.append(item)}for(const method of ['dinheiro','pix','debito','credito']){const item=document.createElement('div');item.className='cash-stat';const label=document.createElement('span');label.textContent=({dinheiro:'Dinheiro',pix:'Pix',debito:'Débito',credito:'Crédito'})[method];const strong=document.createElement('strong');strong.textContent=brl(active.filter(x=>x.tipo==='pagamento'&&x.forma===method).reduce((v,x)=>v+Number(x.valor),0));item.append(label,strong);target.append(item)}};
+ renderSummary('cashSummary');renderSummary('financeSummary');
+ const body=$('cashRows');body.replaceChildren();if(!records.length){body.append(row(['Nenhum lançamento nesta data.','','','','','']));return}
+ for(const item of records){const prof=state.professionals.find(p=>String(p.id)===String(item.profissional_id));const tr=row([localTime(item.criado_em),({pagamento:'Recebimento',vale:'Vale',despesa:'Despesa'})[item.tipo]+(item.estornado?' (estornado)':''),item.descricao+(prof?' — '+prof.nome:''),({pix:'Pix',dinheiro:'Dinheiro',debito:'Débito',credito:'Crédito'})[item.forma]||'—',(item.tipo==='pagamento'?'+ ':'− ')+brl(item.valor),'']);
+ if(!item.estornado){const btn=document.createElement('button');btn.className='btn alt';btn.textContent='Estornar';btn.addEventListener('click',async()=>{if(!confirm('Estornar este lançamento? Ele ficará no histórico, mas sairá dos totais.'))return;btn.disabled=true;const {error}=await db.rpc('estornar_com_produtos',{p_movimento_id:item.id});if(error){alert('Erro ao estornar: '+error.message);btn.disabled=false;return}await loadCash();await loadPaymentMarks();renderAgenda(timeBounds(state.date))});tr.lastChild.append(btn)}body.append(tr)}
+}
+function updateCashType(){const isVale=$('cashType').value==='vale';$('cashProfField').style.display=isVale?'':'none';$('cashProf').required=isVale}
+$('cashType').addEventListener('change',updateCashType);
+$('cashDate').value=today();$('cashDate').addEventListener('change',loadCash);
+$('cashToday').addEventListener('click',()=>{$('cashDate').value=today();loadCash()});
+$('cashRefresh').addEventListener('click',loadCash);
+$('goCash').addEventListener('click',()=>showView('caixa'));
+$('cashForm').addEventListener('submit',async e=>{
+ e.preventDefault();const tipo=$('cashType').value,valor=Number($('cashValue').value),profissional_id=tipo==='vale'?$('cashProf').value:null;
+ if(!Number.isFinite(valor)||valor<=0||(tipo==='vale'&&!profissional_id)){$('cashMsg').textContent='Preencha os dados do lançamento.';return}
+ const btn=$('cashSave');btn.disabled=true;$('cashMsg').textContent='Salvando...';
+ const {error}=await db.from('caixa_movimentos').insert({tipo,valor,profissional_id,descricao:$('cashDescription').value.trim(),forma:null});
+ btn.disabled=false;if(error){$('cashMsg').textContent='Erro ao salvar: '+error.message;return}
+ $('cashForm').reset();updateCashType();$('cashMsg').textContent='Lançamento salvo com sucesso!';$('cashDate').value=today();await loadCash();
+});
+const originalFillCashProf=fillComissoes;
+fillComissoes=function(){originalFillCashProf();const select=$('cashProf');select.replaceChildren(new Option('Selecione',''));state.professionals.forEach(p=>select.add(new Option(p.nome,p.id)))};
+
+
+// Produtos: cadastro e recebimento integrado.
+let editingProduct=null;
+async function loadProducts(){
+ const {data,error}=await db.from('produtos').select('id,nome,preco_venda,estoque,ativo').order('nome');
+ if(error){$('productMsg').textContent='Erro ao carregar produtos: '+error.message;return}
+ state.products=data||[];$('productMsg').textContent='';
+ const root=$('productList');root.replaceChildren();
+ for(const p of state.products){const line=document.createElement('div');line.className='product-row';const desc=document.createElement('div');const name=document.createElement('strong');name.textContent=p.nome;const details=document.createElement('div');details.className='notice';details.textContent=`${brl(p.preco_venda)} • Estoque: ${p.estoque} • ${p.ativo?'Ativo':'Inativo'}`;desc.append(name,details);const btn=document.createElement('button');btn.type='button';btn.className='btn alt';btn.textContent='Editar';btn.addEventListener('click',()=>{editingProduct=p.id;$('productName').value=p.nome;$('productPrice').value=p.preco_venda;$('productStock').value=p.estoque;$('productSave').textContent='Salvar alterações';$('productCancel').style.display='inline-block';$('productName').focus()});line.append(desc,btn);root.append(line)}
+ if(!state.products.length)root.textContent='Nenhum produto cadastrado.';
+}
+function resetProductForm(){editingProduct=null;$('productForm').reset();$('productSave').textContent='Salvar produto';$('productCancel').style.display='none'}
+$('productCancel').addEventListener('click',resetProductForm);
+$('productForm').addEventListener('submit',async e=>{
+ e.preventDefault();const nome=$('productName').value.trim(),preco_venda=Number($('productPrice').value),estoque=Number($('productStock').value);
+ if(!nome||!Number.isFinite(preco_venda)||preco_venda<=0||!Number.isInteger(estoque)||estoque<0){$('productMsg').textContent='Confira nome, preço e estoque.';return}
+ const btn=$('productSave');btn.disabled=true;$('productMsg').textContent='Salvando...';const values={nome,preco_venda,estoque};
+ const result=editingProduct?await db.from('produtos').update(values).eq('id',editingProduct).select('id'):await db.from('produtos').insert({...values,ativo:true}).select('id');
+ btn.disabled=false;if(result.error||!result.data?.length){$('productMsg').textContent='Erro ao salvar: '+(result.error?.message||'Sem confirmação do Supabase');return}
+ resetProductForm();await loadProducts();$('productMsg').textContent='Produto salvo com sucesso!';
+});
+function selectedPaymentProducts(){
+ const counts=new Map();for(const r of $('paymentProducts').querySelectorAll('.payment-product-row')){const id=r.querySelector('select').value,q=Number(r.querySelector('input').value);if(!id||!Number.isInteger(q)||q<1){$('paymentMsg').textContent='Escolha um produto e uma quantidade válida.';return null}counts.set(id,(counts.get(id)||0)+q)}
+ for(const [id,q] of counts){const p=state.products.find(x=>x.id===id);if(!p||!p.ativo||q>p.estoque){$('paymentMsg').textContent='Estoque insuficiente ou produto indisponível.';return null}}
+ return [...counts].map(([produto_id,quantidade])=>({produto_id,quantidade}));
+}
+function updatePaymentTotal(){let sum=Number($('paymentValue').value)||0;for(const r of $('paymentProducts').querySelectorAll('.payment-product-row')){const p=state.products.find(x=>x.id===r.querySelector('select').value);sum+=(p?Number(p.preco_venda):0)*(Number(r.querySelector('input').value)||0)}$('paymentTotal').textContent='Total a receber: '+brl(sum)}
+$('paymentValue').addEventListener('input',updatePaymentTotal);
+$('addPaymentProduct').addEventListener('click',()=>{
+ const available=state.products.filter(p=>p.ativo&&p.estoque>0);if(!available.length){$('paymentMsg').textContent='Cadastre produtos com estoque na aba Produtos.';return}
+ const line=document.createElement('div');line.className='payment-product-row';const select=document.createElement('select');select.setAttribute('aria-label','Produto');for(const p of available)select.add(new Option(`${p.nome} • ${brl(p.preco_venda)} • ${p.estoque} un.`,p.id));const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.value='1';qty.setAttribute('aria-label','Quantidade');const remove=document.createElement('button');remove.type='button';remove.className='btn alt';remove.textContent='Remover';remove.addEventListener('click',()=>{line.remove();updatePaymentTotal()});select.addEventListener('change',updatePaymentTotal);qty.addEventListener('input',updatePaymentTotal);line.append(select,qty,remove);$('paymentProducts').append(line);updatePaymentTotal();
+});
+
+// Comissões reais: a view já exclui pagamentos estornados.
+$('comInicio').value=today().slice(0,8)+'01';
+$('comFim').value=today();
+$('comAtualizar').addEventListener('click',loadRealCommissions);
+async function loadRealCommissions(){
+ const msg=$('comRealMsg'),root=$('comRealCards');root.replaceChildren();
+ const begin=$('comInicio').value,end=$('comFim').value;
+ if(!begin||!end||begin>end){msg.textContent='Escolha um período válido.';return}
+ msg.textContent='Consultando recebimentos e vales...';
+ const start=begin+'T00:00:00-03:00',finish=end+'T23:59:59.999-03:00';
+ const [comm,adv]=await Promise.all([
+  db.from('resumo_comissoes').select('profissional_id,total_recebido,total_produtos,total_servicos,comissao_servicos,comissao_produtos,comissao_total').gte('criado_em',start).lte('criado_em',finish).limit(10000),
+  db.from('caixa_movimentos').select('profissional_id,valor').eq('tipo','vale').eq('estornado',false).gte('criado_em',start).lte('criado_em',finish).limit(10000)
+ ]);
+ if(comm.error||adv.error){msg.textContent='Erro ao consultar: '+(comm.error?.message||adv.error?.message);return}
+ if((comm.data||[]).length===10000||(adv.data||[]).length===10000){msg.textContent='O período tem muitos registros. Consulte intervalos menores.';return}
+ msg.textContent='Período: '+begin.split('-').reverse().join('/')+' a '+end.split('-').reverse().join('/')+' • Descontos de vale não são gravados automaticamente.';
+ for(const p of state.professionals){
+  const items=(comm.data||[]).filter(x=>String(x.profissional_id)===String(p.id));
+  const sum=key=>items.reduce((acc,x)=>acc+Number(x[key]||0),0);
+  const vale=(adv.data||[]).filter(x=>String(x.profissional_id)===String(p.id)).reduce((acc,x)=>acc+Number(x.valor||0),0);
+  const total=sum('comissao_total');
+  const card=document.createElement('div');card.className='person';
+  const title=document.createElement('h3');title.textContent=p.nome;card.append(title);
+  const details=document.createElement('div');details.style.lineHeight='1.9';
+  details.textContent='Serviços recebidos: '+brl(sum('total_servicos'))+'\nProdutos vendidos: '+brl(sum('total_produtos'))+'\nComissão serviços (50%): '+brl(sum('comissao_servicos'))+'\nComissão produtos (10%): '+brl(sum('comissao_produtos'))+'\nComissão total: '+brl(total)+'\nVales registrados no período: '+brl(vale);
+  details.style.whiteSpace='pre-line';card.append(details);
+  const label=document.createElement('label');label.textContent='Desconto manual de vales (R$)';label.style.marginTop='12px';
+  const input=document.createElement('input');input.type='number';input.min='0';input.step='0.01';input.value='0';
+  const net=document.createElement('strong');net.style.cssText='display:block;margin-top:12px;color:#9ef0c5';
+  const update=()=>{const discount=Number(input.value);if(!Number.isFinite(discount)||discount<0){net.textContent='Informe um desconto válido.';return}net.textContent='Valor estimado a pagar: '+brl(total-discount)};
+  input.addEventListener('input',update);card.append(label,input,net);update();root.append(card);
+ }
+ if(!state.professionals.length)msg.textContent='Nenhum profissional ativo encontrado.';
 }
 
-async function loadCommissions(){
- if(!professional)return;
- const start=$('comStart').value,end=$('comEnd').value;
- if(!start||!end||start>end){$('comMsg').textContent='Escolha um período válido.';return}
- $('comMsg').textContent='Consultando comissões...';
- const {data,error}=await db.rpc('resumo_comissao_talento',{p_inicio:start,p_fim:end,p_profissional:professional.id});
- if(error){$('comMsg').textContent='Resumo geral indisponível: '+error.message;await loadServiceHistory(start,end);return}
- const c=data?.[0];$('commissionSummary').replaceChildren();
- if(!c){$('comMsg').textContent='Nenhum dado encontrado.';return}
- $('comMsg').textContent='Comissões sobre pagamentos confirmados. Produtos cobrados junto com serviços devem ser conferidos pelo administrador.';
- for(const [label,value] of [['Minha porcentagem',Number(c.percentual).toLocaleString('pt-BR')+'%'],['Recebido no caixa',Number(c.recebido).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})],['Comissão calculada',Number(c.comissao).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})],['Líquido após vales',Number(c.comissao||0)-Number(c.vales||0)],['Vales (separados)',Number(c.vales).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})]]){
- const el=document.createElement('div');el.className='kpi';const t=document.createElement('div');t.className='sub';t.textContent=label;const v=document.createElement('strong');v.textContent=typeof value==='number'?money(value):value;el.append(t,v);$('commissionSummary').append(el)
- }
- await loadServiceHistory(start,end);
+// Gestão de agendamentos: remarcação e cancelamento exigem permissão UPDATE no Supabase.
+let managedBooking=null;
+function closeManageBooking(){managedBooking=null;$('manageBookingModal').style.display='none'}
+$('manageBookingClose').addEventListener('click',closeManageBooking);
+$('manageBookingModal').addEventListener('click',e=>{if(e.target===$('manageBookingModal'))closeManageBooking()});
+$('manageBookingReceive').addEventListener('click',()=>{const b=managedBooking;if(!b)return;closeManageBooking();openPayment(b)});
+async function openManageBooking(b){
+ managedBooking=b;
+ const svc=state.services.find(s=>String(s.id)===String(b.servico_id));
+ const prof=state.professionals.find(p=>String(p.id)===String(b.profissional_id));
+ $('manageBookingInfo').textContent=`${b.cliente_nome} • ${prof?.nome||'Profissional'} • ${svc?.nome||'Serviço'} • ${localDate(b.inicio)}`;
+ $('manageBookingDate').value=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(b.inicio));
+ $('manageBookingMsg').textContent='';$('manageBookingModal').style.display='flex';
+ const paid=state.payments.some(x=>x.agendamento_id===b.id);
+ $('manageBookingCancel').disabled=paid;$('manageBookingSave').disabled=paid;
+ if(paid)$('manageBookingMsg').textContent='Atendimento pago: estorne o recebimento no Caixa antes de alterar o agendamento.';
+ $('manageBookingTime').value=localTime(b.inicio);$('manageBookingEnd').value=localTime(b.fim);
+ await updateManageTimes();
 }
-$('comStart').value=today().slice(0,7)+'-01';$('comEnd').value=today();$('comRefresh').onclick=loadCommissions;
-try{if(!window.supabase)throw Error('Biblioteca Supabase não carregou.');db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);init().catch(e=>showError('Erro: '+e.message))}catch(e){showError('Erro de configuração: '+e.message)}
+async function updateManageTimes(){
+ const b=managedBooking;if(!b)return;
+ if(!timeBounds($('manageBookingDate').value))$('manageBookingMsg').textContent='Sem expediente nesta data.';
+ else $('manageBookingMsg').textContent='Escolha início e término. Conflitos serão verificados ao salvar.';
+}
+$('manageBookingDate').addEventListener('change',updateManageTimes);
+$('manageBookingForm').addEventListener('submit',async e=>{
+ e.preventDefault();const b=managedBooking;if(!b)return;
+ const date=$('manageBookingDate').value,time=$('manageBookingTime').value,finish=$('manageBookingEnd').value,svc=state.services.find(s=>String(s.id)===String(b.servico_id));if(!date||!time||!finish||!svc)return;
+ const start=new Date(`${date}T${time}:00-03:00`),end=new Date(`${date}T${finish}:00-03:00`);const bounds=timeBounds(date);const [sh,sm]=time.split(':').map(Number),[eh,em]=finish.split(':').map(Number);if(!bounds||sh*60+sm<bounds.start||eh*60+em>bounds.end||end<=start){$('manageBookingMsg').textContent='Confira início e término dentro do expediente.';return;}
+ const button=$('manageBookingSave');button.disabled=true;$('manageBookingMsg').textContent='Verificando e salvando...';
+ const check=await db.from('agendamentos').select('id,inicio,fim,status').eq('profissional_id',b.profissional_id).lt('inicio',end.toISOString()).gt('fim',start.toISOString());
+ if(check.error){$('manageBookingMsg').textContent=check.error.message;button.disabled=false;return}
+ if((check.data||[]).some(x=>String(x.id)!==String(b.id)&&!cancelled(x.status))){$('manageBookingMsg').textContent='Horário ocupado. Escolha outro.';button.disabled=false;await updateManageTimes();return}
+ const result=await db.from('agendamentos').update({inicio:start.toISOString(),fim:end.toISOString()}).eq('id',b.id).select('id');
+ button.disabled=false;
+ if(result.error||!result.data?.length){$('manageBookingMsg').textContent='Não foi possível remarcar: '+(result.error?.message||'Sem permissão de atualização.');return}
+ closeManageBooking();$('dataAgenda').value=date;await loadAgenda();setStatus('Agendamento remarcado com sucesso.');
+});
+$('manageBookingCancel').addEventListener('click',async()=>{
+ const b=managedBooking;if(!b)return;
+ if(!confirm(`Cancelar o agendamento de ${b.cliente_nome}?`))return;
+ const button=$('manageBookingCancel');button.disabled=true;$('manageBookingMsg').textContent='Cancelando...';
+ const result=await db.from('agendamentos').update({status:'cancelado'}).eq('id',b.id).select('id');
+ button.disabled=false;
+ if(result.error||!result.data?.length){$('manageBookingMsg').textContent='Não foi possível cancelar: '+(result.error?.message||'Sem permissão de atualização.');return}
+ closeManageBooking();await loadAgenda();setStatus('Agendamento cancelado.');
+});
+
+(async()=>{const {data:{session}}=await db.auth.getSession();if(session)await enter()})();
 </script></body></html>
