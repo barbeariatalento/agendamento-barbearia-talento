@@ -156,7 +156,7 @@ function renderProfessionals(){
   const status=document.createElement('div');status.className='pill';status.textContent='Ativo';card.append(document.createElement('br'),status);
   const actions=document.createElement('div');actions.className='prof-actions';
   const label=document.createElement('label');label.className='btn';label.style.cssText='cursor:pointer;color:white;margin:0';label.textContent=p.foto_url?'Trocar foto':'Adicionar foto';
-  const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.setAttribute('aria-label','Selecionar foto de '+p.nome);label.append(input);actions.append(label);card.append(actions);
+  const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.setAttribute('aria-label','Selecionar foto de '+p.nome);label.append(input);actions.append(label);const hoursButton=document.createElement('button');hoursButton.type='button';hoursButton.className='btn alt';hoursButton.textContent='🕒 Configurar horários e pausas';hoursButton.addEventListener('click',()=>openWorkingHours(p));actions.append(hoursButton);card.append(actions);
   const feedback=document.createElement('div');feedback.className='prof-feedback';feedback.setAttribute('role','status');card.append(feedback);
   input.addEventListener('change',async()=>{
    const file=input.files?.[0];if(!file)return;
@@ -192,7 +192,11 @@ function getWorkingDay(professionalId,date){
  if(!state.hoursLoaded)return null;
  const day=new Date(date+'T12:00:00').getDay();
  const record=state.workingHours.find(x=>String(x.profissional_id)===String(professionalId)&&Number(x.dia_semana)===day);
- return record||{ativo:false};
+ if(record)return record;
+ // Sem configuração salva para este profissional, mantenha o expediente padrão.
+ const hasAny=state.workingHours.some(x=>String(x.profissional_id)===String(professionalId));
+ if(hasAny)return {ativo:false};
+ return day===0||day===1?{ativo:false}:{ativo:true,inicio:day===6?'08:00':'09:00',fim:day===6?'18:00':'20:00',intervalo_inicio:null,intervalo_fim:null};
 }
 function toMinutes(t){if(!t)return null;const a=String(t).split(':').map(Number);return a[0]*60+a[1]}
 function withinWorkingHours(professionalId,date,start,end){
@@ -545,7 +549,7 @@ $('manageBookingDate').addEventListener('change',updateManageTimes);
 $('manageBookingForm').addEventListener('submit',async e=>{
  e.preventDefault();const b=managedBooking;if(!b)return;
  const date=$('manageBookingDate').value,time=$('manageBookingTime').value,finish=$('manageBookingEnd').value,svc=state.services.find(s=>String(s.id)===String(b.servico_id));if(!date||!time||!finish||!svc)return;
- const start=new Date(`${date}T${time}:00-03:00`),end=new Date(`${date}T${finish}:00-03:00`);const bounds=timeBounds(date);const [sh,sm]=time.split(':').map(Number),[eh,em]=finish.split(':').map(Number);if(!bounds||sh*60+sm<bounds.start||eh*60+em||end<=start||!withinWorkingHours(b.profissional_id,date,sh*60+sm,eh*60+em)){$('manageBookingMsg').textContent='Confira início e término dentro do expediente.';return;}
+ const start=new Date(`${date}T${time}:00-03:00`),end=new Date(`${date}T${finish}:00-03:00`);const bounds=timeBounds(date);const [sh,sm]=time.split(':').map(Number),[eh,em]=finish.split(':').map(Number);if(!bounds||sh*60+sm<bounds.start||eh*60+em>bounds.end||end<=start||!withinWorkingHours(b.profissional_id,date,sh*60+sm,eh*60+em)){$('manageBookingMsg').textContent='Confira início e término dentro do expediente.';return;}
  const button=$('manageBookingSave');button.disabled=true;$('manageBookingMsg').textContent='Verificando e salvando...';
  const check=await db.from('agendamentos').select('id,inicio,fim,status').eq('profissional_id',b.profissional_id).lt('inicio',end.toISOString()).gt('fim',start.toISOString());
  if(check.error){$('manageBookingMsg').textContent=check.error.message;button.disabled=false;return}
