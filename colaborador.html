@@ -112,32 +112,27 @@ $('logout').onclick=async()=>{await db.auth.signOut();professional=null;showErro
 const money=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 async function loadServiceHistory(start,end){
  const area=$('performance');area.replaceChildren();
- try{
-  const [appointments,catalog]=await Promise.all([
-   db.from('agendamentos').select('id,cliente_nome,servico_id,inicio,fim,status').eq('profissional_id',professional.id).gte('inicio',start+'T00:00:00-03:00').lt('inicio',plusDate(end,1)+'T00:00:00-03:00').order('inicio',{ascending:false}).limit(500),
-   db.from('servicos').select('*')
-  ]);
-  if(appointments.error)throw appointments.error;
-  const byId=new Map((catalog.error?services:(catalog.data||[])).map(x=>[String(x.id),x]));
-  const rows=(appointments.data||[]).filter(b=>!isCancelled(b));
-  const header=document.createElement('p');header.className='sub';header.textContent=rows.length+' agendamento(s) não cancelado(s) no período. Agendado não significa necessariamente realizado ou pago.';area.append(header);
-  if(!rows.length)return;
-  for(const b of rows){
-   const service=byId.get(String(b.servico_id))||{};
-   const el=document.createElement('div');el.className='appt';
-   const left=document.createElement('div');
-   const name=document.createElement('b');name.textContent=b.cliente_nome||'Cliente';
-   const detail=document.createElement('small');
-   detail.textContent=new Date(b.inicio).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'})+' • '+time(b.inicio)+'–'+time(b.fim)+' • '+(service.nome||'Serviço')+' • '+(b.status||'Agendado');
-   left.append(name,detail);
-   const right=document.createElement('div');right.style.textAlign='right';
-   const amount=service.preco??service.valor??service.preco_padrao;
-   const price=document.createElement('b');price.textContent=amount!==undefined&&amount!==null&&amount!==''&&Number.isFinite(Number(amount))?'Tabela: '+money(amount):'Valor não cadastrado';
-   const note=document.createElement('small');note.textContent='Preço de tabela, não comprovante de pagamento';
-   right.append(price,note);el.append(left,right);area.append(el);
-  }
-  if(rows.length===500){const note=document.createElement('p');note.className='sub';note.textContent='Mostrando até 500 agendamentos. Consulte um período menor para ver todos.';area.append(note)}
- }catch(err){area.textContent='Não foi possível carregar os serviços: '+err.message}
+ const {data,error}=await db.rpc('historico_recebimentos_talento',{p_inicio:start,p_fim:end});
+ if(error){area.textContent='Para mostrar os pagamentos reais, instale primeiro o SQL da Etapa 2 no Supabase. Detalhes: '+error.message;return}
+ const rows=data||[];
+ const header=document.createElement('p');header.className='sub';
+ const total=rows.reduce((sum,x)=>sum+Number(x.valor_recebido||0),0);
+ header.textContent=rows.length+' atendimento(s) recebido(s) • Total serviços: '+money(total)+' • Comissão de serviços (50%): '+money(total*.5);
+ area.append(header);
+ if(!rows.length){const p=document.createElement('p');p.className='sub';p.textContent='Nenhum serviço pago neste período.';area.append(p);return}
+ for(const x of rows){
+  const el=document.createElement('div');el.className='appt';
+  const left=document.createElement('div');
+  const name=document.createElement('b');name.textContent=x.cliente_nome||'Cliente';
+  const detail=document.createElement('small');
+  detail.textContent=new Date(x.pago_em).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'})+' • '+(x.servico_nome||'Serviço')+' • '+(x.forma||'Pagamento');
+  left.append(name,detail);
+  const right=document.createElement('div');right.style.textAlign='right';
+  const price=document.createElement('b');price.textContent=money(x.valor_recebido);
+  const note=document.createElement('small');note.textContent='Comissão: '+money(x.comissao_servico);
+  right.append(price,note);el.append(left,right);area.append(el);
+ }
+ if(rows.length===500){const p=document.createElement('p');p.className='sub';p.textContent='Mostrando até 500 pagamentos. Consulte um período menor.';area.append(p)}
 }
 
 async function loadCommissions(){
@@ -146,13 +141,14 @@ async function loadCommissions(){
  if(!start||!end||start>end){$('comMsg').textContent='Escolha um período válido.';return}
  $('comMsg').textContent='Consultando comissões...';
  const {data,error}=await db.rpc('resumo_comissao_talento',{p_inicio:start,p_fim:end,p_profissional:professional.id});
- if(error){$('comMsg').textContent='Não foi possível consultar. O administrador precisa instalar o módulo de comissões. '+error.message;return}
+ if(error){$('comMsg').textContent='Resumo geral indisponível: '+error.message;await loadServiceHistory(start,end);return}
  const c=data?.[0];$('commissionSummary').replaceChildren();
  if(!c){$('comMsg').textContent='Nenhum dado encontrado.';return}
- $('comMsg').textContent='Comissões sobre valores recebidos no caixa; vales não foram descontados automaticamente.';
+ $('comMsg').textContent='Histórico dos serviços pagos: comissão de 50%. O resumo geral segue as configurações de comissão já existentes no Supabase.';
  for(const [label,value] of [['Minha porcentagem',Number(c.percentual).toLocaleString('pt-BR')+'%'],['Recebido no caixa',Number(c.recebido).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})],['Comissão calculada',Number(c.comissao).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})],['Já me pagaram',Number(c.repassado).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})],['Saldo do período',Number(c.saldo).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})],['Vales (separados)',Number(c.vales).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})]]){
  const el=document.createElement('div');el.className='kpi';const t=document.createElement('div');t.className='sub';t.textContent=label;const v=document.createElement('strong');v.textContent=value;el.append(t,v);$('commissionSummary').append(el)
  }
+ await loadServiceHistory(start,end);
 }
 $('comStart').value=today().slice(0,7)+'-01';$('comEnd').value=today();$('comRefresh').onclick=loadCommissions;
 try{if(!window.supabase)throw Error('Biblioteca Supabase não carregou.');db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);init().catch(e=>showError('Erro: '+e.message))}catch(e){showError('Erro de configuração: '+e.message)}
