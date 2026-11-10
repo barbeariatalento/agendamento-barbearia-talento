@@ -149,8 +149,7 @@ function openWhatsAppMessage(b,type){
  const phone=whatsappPhone(b.cliente_telefone);
  if(!phone){alert('O telefone do cliente está ausente ou inválido. Confira o número com DDD.');return}
  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(avisoText(b,type));
- const popup=window.open(url,'_blank','noopener,noreferrer');
- if(!popup)alert('Seu navegador bloqueou a abertura do WhatsApp. Permita pop-ups para este site e tente novamente.');
+ window.location.assign(url); // Abre na mesma aba, sem depender de pop-ups.
 }
 function reminderItem(b){
  const wrap=document.createElement('div');wrap.className='service-row';wrap.style.flexWrap='wrap';
