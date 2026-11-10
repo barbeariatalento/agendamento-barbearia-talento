@@ -127,63 +127,7 @@ body{background:var(--bg)}.sidebar{background:#080c13;border-right:1px solid #19
 <div class="modal-wrap" id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><h2 id="modalTitle">Novo agendamento</h2><form id="bookingForm"><div class="full"><label for="clienteNome">Nome do cliente</label><input id="clienteNome" list="talentoClientes" autocomplete="off" required maxlength="120"><datalist id="talentoClientes"></datalist></div><div class="full"><label for="clienteTelefone">WhatsApp</label><input id="clienteTelefone" required maxlength="30" inputmode="tel"></div><div><label for="bookingProf">Profissional</label><select id="bookingProf" required></select></div><div><label for="bookingServico">Serviço</label><select id="bookingServico" required></select></div><div><label for="bookingDate">Data</label><input type="date" id="bookingDate" required></div><div><label for="bookingTime">Início</label><input id="bookingTime" type="time" step="60" required><label for="bookingEnd">Término</label><input id="bookingEnd" type="time" step="60" required></div><div class="full" style="padding:12px;border:1px solid #39506b;border-radius:10px"><label style="display:flex;align-items:center;gap:9px;color:white"><input id="bookingRepeat" type="checkbox" style="width:auto"> Repetir agendamento no mesmo dia e horário</label><div id="repeatOptions" style="display:none;margin-top:10px"><label for="bookingRepeatFrequency">Frequência</label><select id="bookingRepeatFrequency"><option value="7">Semanal (a cada 7 dias)</option><option value="14">Quinzenal (a cada 14 dias)</option><option value="15">A cada 15 dias</option></select><label for="bookingRepeatCount" style="margin-top:10px">Quantidade de agendamentos (incluindo o primeiro)</label><select id="bookingRepeatCount"><option value="4">4 agendamentos</option><option value="8">8 agendamentos</option><option value="12">12 agendamentos</option><option value="26">26 agendamentos</option></select><p class="notice">Horários ocupados, bloqueios e folgas serão ignorados; encaixes manuais podem ocorrer durante pausas.</p></div></div><p class="notice full" id="bookingMsg" role="status"></p><div class="footer full"><button type="button" class="btn alt" id="cancelModal">Cancelar</button><button type="submit" class="btn" id="salvar">Confirmar agendamento</button></div></form></div></div>
 <div class="modal-wrap" id="paymentModal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle"><div class="modal"><h2 id="paymentTitle">Receber cliente</h2><p id="paymentClient"></p><p id="paymentService" class="notice"></p><form id="paymentForm" style="display:grid;gap:12px"><div><label for="paymentValue">Valor recebido (R$)</label><input type="number" id="paymentValue" step="0.01" min="0.01" required></div><div><label>Serviços extras vendidos (opcional)</label><div id="paymentExtras"></div><button type="button" class="btn alt" id="addPaymentExtra">+ Adicionar extra</button></div><div><label>Produtos vendidos (opcional)</label><div id="paymentProducts"></div><button id="addPaymentProduct" class="btn alt" type="button">+ Adicionar produto</button></div><p class="notice" id="paymentTotal"></p><div><label for="paymentMethod">Forma de pagamento</label><select id="paymentMethod"><option value="pix">Pix</option><option value="dinheiro">Dinheiro</option><option value="debito">Cartão de débito</option><option value="credito">Cartão de crédito</option></select></div><p id="paymentMsg" class="notice" role="status"></p><div class="cash-modal-actions"><button class="btn alt" type="button" id="paymentCancel">Cancelar</button><button class="btn" type="submit" id="paymentSave">Confirmar recebimento</button></div></form></div></div>
 <div class="modal-wrap" id="manageBookingModal" role="dialog" aria-modal="true" aria-labelledby="manageBookingTitle"><div class="modal"><h2 id="manageBookingTitle">Gerenciar agendamento</h2><p id="manageBookingInfo" class="notice"></p><form id="manageBookingForm" style="display:grid;gap:12px"><div><label for="manageBookingService">Serviço</label><select id="manageBookingService" required></select></div><div><label for="manageBookingDate">Nova data</label><input type="date" id="manageBookingDate" required></div><div><label for="manageBookingTime">Novo início</label><input id="manageBookingTime" type="time" step="60" required><label for="manageBookingEnd">Novo término</label><input id="manageBookingEnd" type="time" step="60" required></div><p id="manageBookingMsg" class="notice" role="status"></p><div class="cash-modal-actions"><button type="button" class="btn alt" id="manageBookingWhatsApp">📲 Enviar confirmação</button><button type="button" class="btn alt" id="manageBookingClose">Fechar</button><button type="button" class="btn alt" id="manageBookingCancel">Cancelar agendamento</button><button type="button" class="btn alt" id="manageBookingReceive">Receber pagamento</button><button type="submit" class="btn" id="manageBookingSave">Salvar remarcação</button></div></form></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-// Avisos por WhatsApp: o navegador apenas abre a conversa com texto preenchido.
-// Não há envio automático, registro de entrega ou integração oculta.
-function whatsappPhone(value){
- const digits=String(value||'').replace(/\D/g,'');
- if(digits.length===11||digits.length===10)return '55'+digits;
- if((digits.length===12||digits.length===13)&&digits.startsWith('55'))return digits;
- return null;
-}
-function avisoText(b,type){
- const first=String(b.cliente_nome||'cliente').trim().split(/\s+/)[0];
- const prof=state.professionals.find(x=>String(x.id)===String(b.profissional_id));
- const svc=state.services.find(x=>String(x.id)===String(b.servico_id));
- const date=new Date(b.inicio).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'});
- const hour=localTime(b.inicio);
- if(type==='lembrete')return `💈 Olá, ${first}! Passando para lembrar que seu horário na Barbearia Talento está chegando!\n\n✂️ Serviço: ${svc?.nome||'Agendamento'}\n💈 Profissional: ${prof?.nome||'Equipe Talento'}\n📅 Data: ${date}\n🕒 Horário: ${hour}\n\n📍 Rua da Saudade, 261 – Vila Conrado.\nPedimos pontualidade. Tolerância de 5 minutos com aviso prévio. Até já! 💈`;
- return `✅ Olá, ${first}! Seu agendamento na Barbearia Talento está confirmado!\n\n✂️ Serviço: ${svc?.nome||'Agendamento'}\n💈 Profissional: ${prof?.nome||'Equipe Talento'}\n📅 Data: ${date}\n🕒 Horário: ${hour}\n\n📍 Rua da Saudade, 261 – Vila Conrado.\nTolerância de 5 minutos com aviso prévio. Esperamos você! 💈`;
-}
-function openWhatsAppMessage(b,type){
- const phone=whatsappPhone(b.cliente_telefone);
- if(!phone){alert('O telefone do cliente está ausente ou inválido. Confira o número com DDD.');return}
- const url='https://wa.me/'+phone+'?text='+encodeURIComponent(avisoText(b,type));
- window.location.assign(url); // Abre na mesma aba, sem depender de pop-ups.
-}
-function reminderItem(b){
- const wrap=document.createElement('div');wrap.className='service-row';wrap.style.flexWrap='wrap';
- const info=document.createElement('div');
- const name=document.createElement('strong');name.textContent=b.cliente_nome||'Cliente';
- const prof=state.professionals.find(x=>String(x.id)===String(b.profissional_id));
- const details=document.createElement('div');details.className='notice';details.textContent=`${localDate(b.inicio)} • ${prof?.nome||'Profissional'} • ${b.cliente_telefone||'Sem telefone'}`;
- info.append(name,details);
- const actions=document.createElement('div');actions.className='actions';
- for(const [label,type] of [['📲 Confirmação','confirmacao'],['⏰ Lembrete','lembrete']]){
-  const button=document.createElement('button');button.type='button';button.className='btn alt';button.textContent=label;
-  button.addEventListener('click',()=>openWhatsAppMessage(b,type));actions.append(button);
- }
- wrap.append(info,actions);return wrap;
-}
-async function loadReminders(){
- const status=$('reminderStatus');if(!status)return;
- status.textContent='Consultando próximos agendamentos...';
- const now=new Date(),end=new Date(now.getTime()+48*60*60*1000);
- const result=await db.from('agendamentos').select('id,cliente_nome,cliente_telefone,profissional_id,servico_id,inicio,fim,status').gte('inicio',now.toISOString()).lte('inicio',end.toISOString()).order('inicio');
- if(result.error){status.textContent='Não foi possível consultar os lembretes: '+result.error.message;return}
- const rows=(result.data||[]).filter(b=>!cancelled(b.status));
- const soon=$('reminderSoon'),next=$('reminderNext');soon.replaceChildren();next.replaceChildren();
- const soonRows=rows.filter(b=>new Date(b.inicio).getTime()-now.getTime()<=60*60*1000);
- for(const b of soonRows)soon.append(reminderItem(b));
- for(const b of rows)next.append(reminderItem(b));
- if(!soonRows.length)soon.textContent='Nenhum atendimento começando na próxima hora.';
- if(!rows.length)next.textContent='Nenhum agendamento nas próximas 48 horas.';
- status.textContent=`${soonRows.length} horário(s) na próxima hora. Abra o WhatsApp e confirme o envio manualmente.`;
-}
-$('reminderRefresh').addEventListener('click',loadReminders);
-$('manageBookingWhatsApp').addEventListener('click',()=>{if(managedBooking)openWhatsAppMessage(managedBooking,'confirmacao')});
-
-</script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 'use strict';
 const SUPABASE_URL='https://urfeqeoqkpgzuyulklnk.supabase.co';
 const SUPABASE_KEY='sb_publishable_BgFIN8TtCC2zIYWCBxV1EA_vpnXlXrD';
@@ -400,7 +344,7 @@ $('bookingForm').addEventListener('submit',async e=>{
      openWhatsAppMessage({cliente_nome:$('clienteNome').value.trim(),cliente_telefone:$('clienteTelefone').value.trim(),profissional_id:prof,servico_id:s.id,inicio:new Date(`${created[0]}T${t}:00-03:00`).toISOString()},'confirmacao');
    }
    if(skipped.length)alert('Agendamentos criados: '+created.length+'\nDatas não agendadas:\n'+skipped.join('\n'));
-   if(created.length===1){const openNow=confirm('Agendamento salvo! Deseja abrir o WhatsApp para enviar a confirmação ao cliente agora?');if(openNow)openWhatsAppMessage({cliente_nome:$('clienteNome').value.trim(),cliente_telefone:$('clienteTelefone').value.trim(),profissional_id:prof,servico_id:s.id,inicio:new Date(`${created[0]}T${t}:00-03:00`).toISOString()},'confirmacao');}
+
   }else $('bookingMsg').textContent='Nenhum horário foi agendado. '+skipped.join('; ');
  }catch(err){
   $('bookingMsg').textContent=`Erro: ${err.message}. ${created.length} agendamento(s) já foram salvos; confira a agenda antes de tentar novamente.`;
@@ -767,4 +711,61 @@ $('pkgRefresh').addEventListener('click',loadPackages);
 $('pkgSearch').addEventListener('input',()=>{if(state.view==='pacotes')loadPackages()});
 
 (async()=>{const {data:{session}}=await db.auth.getSession();if(session)await enter()})();
-</script></body></html>
+</script><script>
+// Avisos por WhatsApp: o navegador apenas abre a conversa com texto preenchido.
+// Não há envio automático, registro de entrega ou integração oculta.
+function whatsappPhone(value){
+ const digits=String(value||'').replace(/\D/g,'');
+ if(digits.length===11||digits.length===10)return '55'+digits;
+ if((digits.length===12||digits.length===13)&&digits.startsWith('55'))return digits;
+ return null;
+}
+function avisoText(b,type){
+ const first=String(b.cliente_nome||'cliente').trim().split(/\s+/)[0];
+ const prof=state.professionals.find(x=>String(x.id)===String(b.profissional_id));
+ const svc=state.services.find(x=>String(x.id)===String(b.servico_id));
+ const date=new Date(b.inicio).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'});
+ const hour=localTime(b.inicio);
+ if(type==='lembrete')return `💈 Olá, ${first}! Passando para lembrar que seu horário na Barbearia Talento está chegando!\n\n✂️ Serviço: ${svc?.nome||'Agendamento'}\n💈 Profissional: ${prof?.nome||'Equipe Talento'}\n📅 Data: ${date}\n🕒 Horário: ${hour}\n\n📍 Rua da Saudade, 261 – Vila Conrado.\nPedimos pontualidade. Tolerância de 5 minutos com aviso prévio. Até já! 💈`;
+ return `✅ Olá, ${first}! Seu agendamento na Barbearia Talento está confirmado!\n\n✂️ Serviço: ${svc?.nome||'Agendamento'}\n💈 Profissional: ${prof?.nome||'Equipe Talento'}\n📅 Data: ${date}\n🕒 Horário: ${hour}\n\n📍 Rua da Saudade, 261 – Vila Conrado.\nTolerância de 5 minutos com aviso prévio. Esperamos você! 💈`;
+}
+function openWhatsAppMessage(b,type){
+ const phone=whatsappPhone(b.cliente_telefone);
+ if(!phone){alert('O telefone do cliente está ausente ou inválido. Confira o número com DDD.');return}
+ const url='https://wa.me/'+phone+'?text='+encodeURIComponent(avisoText(b,type));
+ window.location.assign(url); // Abre na mesma aba, sem depender de pop-ups.
+}
+function reminderItem(b){
+ const wrap=document.createElement('div');wrap.className='service-row';wrap.style.flexWrap='wrap';
+ const info=document.createElement('div');
+ const name=document.createElement('strong');name.textContent=b.cliente_nome||'Cliente';
+ const prof=state.professionals.find(x=>String(x.id)===String(b.profissional_id));
+ const details=document.createElement('div');details.className='notice';details.textContent=`${localDate(b.inicio)} • ${prof?.nome||'Profissional'} • ${b.cliente_telefone||'Sem telefone'}`;
+ info.append(name,details);
+ const actions=document.createElement('div');actions.className='actions';
+ for(const [label,type] of [['📲 Confirmação','confirmacao'],['⏰ Lembrete','lembrete']]){
+  const button=document.createElement('button');button.type='button';button.className='btn alt';button.textContent=label;
+  button.addEventListener('click',()=>openWhatsAppMessage(b,type));actions.append(button);
+ }
+ wrap.append(info,actions);return wrap;
+}
+async function loadReminders(){
+ const status=$('reminderStatus');if(!status)return;
+ status.textContent='Consultando próximos agendamentos...';
+ const now=new Date(),end=new Date(now.getTime()+48*60*60*1000);
+ const result=await db.from('agendamentos').select('id,cliente_nome,cliente_telefone,profissional_id,servico_id,inicio,fim,status').gte('inicio',now.toISOString()).lte('inicio',end.toISOString()).order('inicio');
+ if(result.error){status.textContent='Não foi possível consultar os lembretes: '+result.error.message;return}
+ const rows=(result.data||[]).filter(b=>!cancelled(b.status));
+ const soon=$('reminderSoon'),next=$('reminderNext');soon.replaceChildren();next.replaceChildren();
+ const soonRows=rows.filter(b=>new Date(b.inicio).getTime()-now.getTime()<=60*60*1000);
+ for(const b of soonRows)soon.append(reminderItem(b));
+ for(const b of rows)next.append(reminderItem(b));
+ if(!soonRows.length)soon.textContent='Nenhum atendimento começando na próxima hora.';
+ if(!rows.length)next.textContent='Nenhum agendamento nas próximas 48 horas.';
+ status.textContent=`${soonRows.length} horário(s) na próxima hora. Abra o WhatsApp e confirme o envio manualmente.`;
+}
+$('reminderRefresh').addEventListener('click',loadReminders);
+$('manageBookingWhatsApp').addEventListener('click',()=>{if(managedBooking)openWhatsAppMessage(managedBooking,'confirmacao')});
+
+</script>
+</body></html>
