@@ -79,7 +79,7 @@ for(let m=wh[0];m<=wh[1];m+=20){
   const label=document.createElement('div');label.className='visual-hour'+(major?' major':'');label.style.top=(y+(major?13:28))+'px';label.textContent=hh(m);hours.append(label);
   const h=hh(m),startMs=dayStart+(m-wh[0])*60000,endMs=startMs+20*60000;
   const occupied=activeBookings.some(b=>new Date(b.inicio).getTime()<endMs&&new Date(b.fim).getTime()>startMs)||blocks.some(b=>new Date(b.inicio).getTime()<endMs&&new Date(b.fim).getTime()>startMs);
-  if(!occupied){const free=document.createElement('button');free.type='button';free.className='visual-free';free.style.top=y+'px';free.textContent=inBreak(date,m,m+20)?'+ Encaixe na pausa':'+ Agendar';free.setAttribute('aria-label',(inBreak(date,m,m+20)?'Encaixe durante a pausa às ':'Agendar às ')+h);free.onclick=()=>openChoice(h);track.append(free)}
+  if(!occupied){const free=document.createElement('button');free.type='button';free.className='visual-free';free.style.top=y+'px';free.textContent='+ Agendar';free.setAttribute('aria-label','Agendar às '+h);free.onclick=()=>openChoice(h);track.append(free)}
  }
 }
 for(const [index,b] of activeBookings.entries()){
