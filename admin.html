@@ -638,8 +638,59 @@ $('manageBookingCancel').addEventListener('click',async()=>{
 // EXTENSÕES TALENTO — módulos independentes, sem substituir as rotinas antigas.
 const dateTimeLocal=iso=>{const d=new Date(iso);return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace(' ','T')};
 async function hasBlock(prof,start,end){const r=await db.from('bloqueios_agenda').select('id').eq('profissional_id',prof).lt('inicio',end.toISOString()).gt('fim',start.toISOString()).limit(1);if(r.error)throw new Error('Não foi possível verificar bloqueios: '+r.error.message);return (r.data||[]).length>0}
-async function loadBlocks(){const range=localDayRange(state.date||today());const r=await db.from('bloqueios_agenda').select('id,profissional_id,inicio,fim,motivo').lt('inicio',range.end).gt('fim',range.start).order('inicio');if(r.error){$('blockMsg').textContent='Erro ao consultar bloqueios: '+r.error.message;state.blocks=[];return}state.blocks=r.data||[];const body=$('blockRows');body.replaceChildren();for(const x of state.blocks){const p=state.professionals.find(y=>String(y.id)===String(x.profissional_id));const tr=row([p?.nome||'Profissional',localDate(x.inicio),localDate(x.fim),x.motivo||'Bloqueio','']);const btn=document.createElement('button');btn.className='btn alt';btn.textContent='Excluir';btn.onclick=async()=>{if(!confirm('Excluir este bloqueio?'))return;const z=await db.from('bloqueios_agenda').delete().eq('id',x.id);if(z.error){$('blockMsg').textContent=z.error.message;return}await loadAgenda()};tr.lastChild.append(btn);body.append(tr)}if(!state.blocks.length)body.append(row(['Sem bloqueios','','','','']))}
-$('blockForm').addEventListener('submit',async e=>{e.preventDefault();const start=new Date($('blockStart').value+':00-03:00'),end=new Date($('blockEnd').value+':00-03:00'),prof=$('blockProf').value;if(!(end>start)){$('blockMsg').textContent='O término deve ser posterior ao início.';return}const r=await db.from('agendamentos').select('id,status').eq('profissional_id',prof).lt('inicio',end.toISOString()).gt('fim',start.toISOString());if(r.error||r.data?.some(x=>!cancelled(x.status))){$('blockMsg').textContent='Há agendamentos nesse período ou não foi possível verificar.';return}const z=await db.from('bloqueios_agenda').insert({profissional_id:prof,inicio:start.toISOString(),fim:end.toISOString(),motivo:$('blockReason').value.trim()||'Bloqueado'});$('blockMsg').textContent=z.error?'Erro: '+z.error.message:'Bloqueio registrado.';if(!z.error)await loadAgenda()});
+async function loadBlocks(){
+ const range=localDayRange(state.date||today());
+ const r=await db.from('bloqueios_agenda').select('id,profissional_id,inicio,fim,motivo').lt('inicio',range.end).gt('fim',range.start).order('inicio');
+ if(r.error){$('blockMsg').textContent='Erro ao consultar bloqueios: '+r.error.message;state.blocks=[];setStatus('Não foi possível consultar bloqueios: '+r.error.message,true);return false}
+ state.blocks=r.data||[];
+ const body=$('blockRows');body.replaceChildren();
+ for(const x of state.blocks){
+  const p=state.professionals.find(y=>String(y.id)===String(x.profissional_id));
+  const tr=row([p?.nome||'Profissional',localDate(x.inicio),localDate(x.fim),x.motivo||'Bloqueio','']);
+  const btn=document.createElement('button');btn.className='btn alt';btn.textContent='Excluir';
+  btn.onclick=async()=>{
+   if(!confirm('Excluir este bloqueio?'))return;
+   const z=await db.from('bloqueios_agenda').delete().eq('id',x.id).select('id');
+   if(z.error||!z.data?.length){$('blockMsg').textContent='Não foi possível excluir o bloqueio: '+(z.error?.message||'Verifique as permissões no Supabase.');return}
+   await loadAgenda();$('blockMsg').textContent='Bloqueio excluído.';
+  };
+  tr.lastChild.append(btn);body.append(tr);
+ }
+ if(!state.blocks.length)body.append(row(['Sem bloqueios nesta data','','','','']));
+ return true;
+}
+let salvandoBloqueio=false;
+$('blockForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(salvandoBloqueio)return;
+ const startText=$('blockStart').value,endText=$('blockEnd').value,prof=$('blockProf').value;
+ const start=new Date(startText+':00-03:00'),end=new Date(endText+':00-03:00');
+ const msg=$('blockMsg');
+ if(!prof||!startText||!endText||!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||!(end>start)){
+  msg.textContent='Escolha o profissional e informe início e término válidos.';return;
+ }
+ const submit=$('blockForm').querySelector('button[type=submit]');
+ salvandoBloqueio=true;submit.disabled=true;msg.textContent='Verificando e salvando bloqueio...';
+ try{
+  const r=await db.from('agendamentos').select('id,status').eq('profissional_id',prof).lt('inicio',end.toISOString()).gt('fim',start.toISOString());
+  if(r.error)throw new Error('Erro ao verificar agendamentos: '+r.error.message);
+  if(r.data?.some(x=>!cancelled(x.status))){msg.textContent='Já existe agendamento nesse período. Não foi criado bloqueio.';return}
+  const existing=await db.from('bloqueios_agenda').select('id').eq('profissional_id',prof).lt('inicio',end.toISOString()).gt('fim',start.toISOString()).limit(1);
+  if(existing.error)throw new Error('Erro ao verificar bloqueios existentes: '+existing.error.message);
+  if(existing.data?.length){msg.textContent='Este horário já possui um bloqueio.';return}
+  const z=await db.from('bloqueios_agenda').insert({profissional_id:prof,inicio:start.toISOString(),fim:end.toISOString(),motivo:$('blockReason').value.trim()||'Bloqueado'}).select('id,profissional_id,inicio,fim,motivo');
+  if(z.error)throw new Error('Erro ao salvar: '+z.error.message);
+  if(!z.data?.length)throw new Error('O Supabase não confirmou o registro. Verifique as permissões da tabela bloqueios_agenda.');
+  const saved=z.data[0];
+  const verify=await db.from('bloqueios_agenda').select('id').eq('id',saved.id).maybeSingle();
+  if(verify.error||!verify.data)throw new Error('O bloqueio foi enviado, mas não pôde ser consultado. Verifique a permissão de leitura no Supabase antes de confiar no bloqueio.');
+  const blockedDate=startText.slice(0,10);
+  state.date=blockedDate;$('dataAgenda').value=blockedDate;
+  await loadAgenda();
+  if(!state.blocks.some(x=>String(x.id)===String(saved.id))){msg.textContent='Bloqueio salvo, mas não apareceu na consulta da agenda. Verifique permissões e atualize.';return}
+  msg.textContent='✓ Bloqueio confirmado na agenda de '+blockedDate.split('-').reverse().join('/')+'. Confira também o site dos clientes.';
+ }catch(err){console.error(err);msg.textContent=err.message||String(err)}
+ finally{salvandoBloqueio=false;submit.disabled=false}
+});
 function selectedExtras(silent=false){const items=[];for(const r of $('paymentExtras').querySelectorAll('.payment-product-row')){const id=r.querySelector('select').value,q=Number(r.querySelector('input').value),svc=state.services.find(s=>String(s.id)===String(id));if(!svc||!Number.isInteger(q)||q<1||!Number.isFinite(Number(svc.preco))){if(!silent)$('paymentMsg').textContent='Confira os extras e os preços cadastrados.';return null}items.push({servico_id:id,quantidade:q,valor_unitario:Number(svc.preco)})}return items}
 $('addPaymentExtra').onclick=()=>{const available=state.services.filter(s=>Number.isFinite(Number(s.preco))&&Number(s.preco)>0);if(!available.length){$('paymentMsg').textContent='Cadastre o preço dos serviços antes de vender extras.';return}const line=document.createElement('div');line.className='payment-product-row';const select=document.createElement('select');available.forEach(s=>select.add(new Option(s.nome+' • '+brl(Number(s.preco)),s.id)));const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.value='1';const remove=document.createElement('button');remove.className='btn alt';remove.type='button';remove.textContent='×';remove.onclick=()=>{line.remove();updatePaymentTotal()};select.onchange=qty.oninput=updatePaymentTotal;line.append(select,qty,remove);$('paymentExtras').append(line);updatePaymentTotal()};
 const normalizedPhone=s=>String(s||'').replace(/\D/g,'');
