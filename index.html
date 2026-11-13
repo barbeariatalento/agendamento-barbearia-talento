@@ -43,25 +43,57 @@ function avancar(){if(etapa===2){if(!dados.hora){aviso('Escolha um horário disp
 function novo(){dados={profissional:null,servico:null,data:'',hora:'',nome:'',telefone:''};etapa=0;render();}
 function mudarData(v){dados.data=v;dados.hora='';buscarHorarios();}
 let consulta=0;
-async function buscarHorarios(){const seq=++consulta,alvo=document.getElementById('horarios');if(!alvo)return;alvo.innerHTML='<p class="hint">Consultando agenda...</p>';if(!dados.data||dados.data<hojeBR()){alvo.innerHTML='';aviso('Escolha uma data válida.');return;}
-const semana=new Date(dados.data+'T12:00:00-03:00').getUTCDay();if(semana===0||semana===1){alvo.innerHTML='<p class="hint">Não atendemos domingo ou segunda-feira.</p>';return;}
-const inicioDia=dados.data+'T00:00:00-03:00',fimDia=dados.data+'T23:59:59-03:00';
-const {data:agendamentos,error}=await db.from('agendamentos').select('inicio,fim,status').eq('profissional_id',dados.profissional.id).gte('inicio',inicioDia).lte('inicio',fimDia);
-if(seq!==consulta||etapa!==2)return;
-if(error){console.error(error);alvo.innerHTML='<p class="hint">Não foi possível consultar a agenda.</p>';return;}
-const abertura=semana===6?8:9,fechamento=semana===6?18:20,duracao=dados.servico.minutos,lista=[];
-for(let minutos=abertura*60;minutos+duracao<=fechamento*60;minutos+=20){const hora=String(Math.floor(minutos/60)).padStart(2,'0')+':'+String(minutos%60).padStart(2,'0');if(dados.data===hojeBR()&&hora<=agoraBR())continue;
-const inicio=new Date(`${dados.data}T${hora}:00-03:00`),fim=new Date(inicio.getTime()+duracao*60000);
-const ocupado=(agendamentos||[]).some(a=>!['cancelado','cancelada','canceled'].includes(String(a.status||'').toLowerCase())&&inicio<new Date(a.fim)&&fim>new Date(a.inicio));if(!ocupado)lista.push(hora);}
-alvo.innerHTML=lista.length?lista.map(h=>`<button type="button" class="choice ${dados.hora===h?'selected':''}" onclick="selecionarHora('${h}')">${h}</button>`).join(''):'<p class="hint">Nenhum horário livre. Escolha outra data.</p>';}
+async function consultarOcupacoes(data, profissionalId) {
+  const inicioDia = data + 'T00:00:00-03:00';
+  const fimDia = new Date(new Date(inicioDia).getTime() + 24*60*60*1000).toISOString();
+  const {data:ocupacoes,error} = await db.rpc('horarios_ocupados_publicos', {
+    p_profissional_id: profissionalId,
+    p_inicio: inicioDia,
+    p_fim: fimDia
+  });
+  if(error || !Array.isArray(ocupacoes)) throw error || new Error('Consulta de disponibilidade inválida');
+  return ocupacoes;
+}
+async function buscarHorarios(){
+  const seq=++consulta,alvo=document.getElementById('horarios');
+  if(!alvo)return;
+  alvo.innerHTML='<p class="hint">Consultando agenda...</p>';
+  if(!dados.data||dados.data<hojeBR()){
+    alvo.innerHTML='';aviso('Escolha uma data válida.');return;
+  }
+  const semana=new Date(dados.data+'T12:00:00-03:00').getUTCDay();
+  if(semana===0||semana===1){alvo.innerHTML='<p class="hint">Não atendemos domingo ou segunda-feira.</p>';return;}
+  let ocupacoes;
+  try { ocupacoes=await consultarOcupacoes(dados.data,dados.profissional.id); }
+  catch(e){
+    console.error('Erro na consulta de horários:',e);
+    if(seq===consulta&&etapa===2){alvo.innerHTML='<p class="hint">Não foi possível verificar a disponibilidade. Tente novamente mais tarde.</p>';dados.hora='';}
+    return;
+  }
+  if(seq!==consulta||etapa!==2)return;
+  const abertura=semana===6?8:9,fechamento=semana===6?18:20,duracao=dados.servico.minutos,lista=[];
+  for(let minutos=abertura*60;minutos+duracao<=fechamento*60;minutos+=20){
+    const hora=String(Math.floor(minutos/60)).padStart(2,'0')+':'+String(minutos%60).padStart(2,'0');
+    if(dados.data===hojeBR()&&hora<=agoraBR())continue;
+    const inicio=new Date(`${dados.data}T${hora}:00-03:00`),fim=new Date(inicio.getTime()+duracao*60000);
+    const ocupado=ocupacoes.some(a=>inicio<new Date(a.fim)&&fim>new Date(a.inicio));
+    if(!ocupado)lista.push(hora);
+  }
+  alvo.innerHTML=lista.length?lista.map(h=>`<button type="button" class="choice ${dados.hora===h?'selected':''}" onclick="selecionarHora('${h}')">${h}</button>`).join(''):'<p class="hint">Nenhum horário livre. Escolha outra data.</p>';
+}
 function selecionarHora(h){dados.hora=h;etapa=3;render();}
 let salvando=false;
 async function confirmar(){if(salvando)return;dados.nome=document.getElementById('nome').value.trim();dados.telefone=document.getElementById('telefone').value.replace(/\D/g,'');if(dados.nome.length<3){aviso('Informe seu nome completo.');return;}if(!/^\d{10,11}$/.test(dados.telefone)){aviso('Informe um telefone válido com DDD.');return;}
 if(!dados.hora||dados.data<hojeBR()){aviso('Escolha novamente um horário válido.');return;}
 salvando=true;document.getElementById('confirmar').disabled=true;aviso('Salvando seu agendamento...');
 const inicio=new Date(`${dados.data}T${dados.hora}:00-03:00`),fim=new Date(inicio.getTime()+dados.servico.minutos*60000);
-try{const {error}=await db.from('agendamentos').insert({cliente_nome:dados.nome,cliente_telefone:dados.telefone,profissional_id:dados.profissional.id,servico_id:dados.servico.id,inicio:inicio.toISOString(),fim:fim.toISOString(),status:'Confirmado'});if(error)throw error;etapa=4;render();}
-catch(e){console.error(e);aviso('Não foi possível confirmar. Confira a agenda antes de tentar novamente. '+(e.code==='23P01'?'Esse horário pode ter sido ocupado.':''));}
+try{
+  const ocupacoes=await consultarOcupacoes(dados.data,dados.profissional.id);
+  if(ocupacoes.some(a=>inicio<new Date(a.fim)&&fim>new Date(a.inicio))){
+    throw new Error('Esse horário já está ocupado ou bloqueado. Volte e escolha outro horário.');
+  }
+  const {error}=await db.from('agendamentos').insert({cliente_nome:dados.nome,cliente_telefone:dados.telefone,profissional_id:dados.profissional.id,servico_id:dados.servico.id,inicio:inicio.toISOString(),fim:fim.toISOString(),status:'Confirmado'});if(error)throw error;etapa=4;render();}
+catch(e){console.error(e);aviso('Não foi possível confirmar. '+(e.message||'Confira a agenda antes de tentar novamente.'));}
 finally{salvando=false;const botao=document.getElementById('confirmar');if(botao)botao.disabled=false;}}
 async function iniciar(){screen.innerHTML='<p class="hint">Carregando profissionais...</p>';const {data,error}=await db.from('profissionais').select('id,nome').eq('ativo',true).order('nome');if(error||!data?.length){console.error(error);screen.innerHTML='<h1>Não foi possível carregar os profissionais.</h1><p class="hint">Tente atualizar a página ou entre em contato com a barbearia.</p>';return;}profissionais=data;
 const {data:servicosDB,error:erroServicos}=await db.from('servicos').select('id,nome,duracao_minutos,preco').eq('ativo',true).order('nome');
