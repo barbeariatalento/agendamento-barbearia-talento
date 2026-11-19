@@ -483,11 +483,11 @@ function openPayment(booking){
 // Editor de comanda paga em modo de preparação: nunca grava alterações financeiras sem RPC transacional.
 async function openPaidComanda(booking,pagos){
  closeManageBooking();paymentBooking=null;paidEditingMovement=null;
- $('paymentTitle').textContent='📋 Corrigir pagamento da comanda';
+ $('paymentTitle').textContent='📋 Alterar valor e adicionar extras';
  $('paymentClient').textContent='Cliente: '+(booking.cliente_nome||'Cliente');
- $('paymentService').textContent='A correção disponível altera somente o valor pago e a forma de pagamento.';
+ $('paymentService').textContent='Valor atual já inclui extras anteriores. Novos extras serão somados ao valor abaixo.';
  $('paymentProducts').replaceChildren();$('paymentExtras').replaceChildren();
- $('addPaymentProduct').disabled=true;$('addPaymentExtra').disabled=true;
+ $('addPaymentProduct').disabled=true;$('addPaymentExtra').disabled=false;
  $('paymentSave').disabled=true;$('paymentSave').textContent='Carregando pagamento...';
  $('paymentMsg').textContent='Buscando lançamento original para evitar duplicidade.';
  $('paymentModal').style.display='flex';
@@ -496,8 +496,8 @@ async function openPaidComanda(booking,pagos){
  paidEditingMovement=data[0].id;
  $('paymentValue').value=Number(data[0].valor).toFixed(2);
  $('paymentMethod').value=data[0].forma==='pix_transferencia'?'pix':data[0].forma||'pix';
- $('paymentSave').textContent='Salvar correção do pagamento';$('paymentSave').disabled=false;
- $('paymentMsg').textContent='Somente valor e forma de pagamento. Produtos, extras e serviço não são alterados nesta versão.';
+ $('paymentSave').textContent='Salvar valor e extras';$('paymentSave').disabled=false;
+ $('paymentMsg').textContent='Extras adicionados serão somados ao valor informado e registrados na comanda. Produtos continuam bloqueados.';
  updatePaymentTotal();
 }
 
@@ -508,10 +508,11 @@ $('paymentForm').addEventListener('submit',async e=>{
  e.preventDefault();
  if(paidEditingMovement!==null){
   const id=paidEditingMovement,valor=Number($('paymentValue').value),forma=$('paymentMethod').value;
+  const extras=selectedExtras();if(extras===null)return;
   if(!Number.isFinite(valor)||valor<=0){$('paymentMsg').textContent='Informe um valor válido.';return}
-  if(!confirm('Confirmar correção do pagamento existente? O caixa será atualizado sem novo lançamento.'))return;
+  if(!confirm('Confirmar atualização do pagamento existente'+(extras.length?' e inclusão de '+extras.length+' serviço(s) extra(s)':'')+'? O caixa será atualizado sem novo lançamento.'))return;
   $('paymentSave').disabled=true;$('paymentMsg').textContent='Salvando correção...';
-  const {error}=await db.rpc('talento_corrigir_pagamento',{p_movimento_id:id,p_valor:valor,p_forma:forma});
+  const {error}=await db.rpc('talento_corrigir_pagamento_com_extras',{p_movimento_id:id,p_valor:valor,p_forma:forma,p_extras:extras.map(x=>({servico_id:x.servico_id,quantidade:x.quantidade}))});
   $('paymentSave').disabled=false;
   if(error){$('paymentMsg').textContent='Não foi possível salvar: '+error.message+'. Verifique se a função SQL foi instalada.';return}
   closePayment();await loadAgenda();return;
