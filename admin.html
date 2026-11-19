@@ -469,7 +469,7 @@ async function loadPaymentMarks(){
  state.payments=data||[];
 }
 function openPayment(booking){
- $('paymentTitle').textContent='Receber cliente';$('paymentSave').textContent='Confirmar recebimento';$('paymentSave').disabled=false;
+ paidEditingMovement=null;$('addPaymentProduct').disabled=false;$('addPaymentExtra').disabled=false;$('paymentTitle').textContent='Receber cliente';$('paymentSave').textContent='Confirmar recebimento';$('paymentSave').disabled=false;
  if(cancelled(booking.status)){alert('Agendamento cancelado: não é possível receber.');return}
  if(state.payments.some(p=>p.agendamento_id===booking.id)){alert('✓ Este cliente já está marcado como pago. Para corrigir, estorne o pagamento no Caixa.');return}
  const mensal=talentoPlanoDoAgendamento(booking);if(mensal&&!confirm('Este cliente tem um PLANO MENSAL ativo. O corte do plano não deve ser cobrado novamente. Deseja mesmo abrir o recebimento para cobrar algum serviço ou produto separado?'))return;
@@ -481,27 +481,42 @@ function openPayment(booking){
  $('paymentProducts').replaceChildren();$('paymentExtras').replaceChildren();$('paymentMethod').value='pix';$('paymentMsg').textContent='';loadProducts().then(updatePaymentTotal);$('paymentModal').style.display='flex';updatePaymentTotal();
 }
 // Editor de comanda paga em modo de preparação: nunca grava alterações financeiras sem RPC transacional.
-function openPaidComanda(booking,pagos){
- closeManageBooking();paymentBooking=null;
- const total=pagos.reduce((s,p)=>s+Number(p.valor||0),0);
- const svc=state.services.find(s=>String(s.id)===String(booking.servico_id));
- $('paymentTitle').textContent='📋 Editar comanda paga';
+async function openPaidComanda(booking,pagos){
+ closeManageBooking();paymentBooking=null;paidEditingMovement=null;
+ $('paymentTitle').textContent='📋 Corrigir pagamento da comanda';
  $('paymentClient').textContent='Cliente: '+(booking.cliente_nome||'Cliente');
- $('paymentService').textContent='Serviço: '+(svc?.nome||'Não identificado')+' • '+localTime(booking.inicio);
- $('paymentValue').value=total.toFixed(2);
- $('paymentMethod').value=pagos[0]?.forma||'pix';
+ $('paymentService').textContent='A correção disponível altera somente o valor pago e a forma de pagamento.';
  $('paymentProducts').replaceChildren();$('paymentExtras').replaceChildren();
- $('paymentMsg').textContent='Você pode preparar as alterações, mas o salvamento financeiro ficará bloqueado até instalarmos a atualização segura no Supabase. O pagamento existente não será alterado.';
- $('paymentSave').textContent='Salvar alterações (integração pendente)';
- $('paymentSave').disabled=true;
+ $('addPaymentProduct').disabled=true;$('addPaymentExtra').disabled=true;
+ $('paymentSave').disabled=true;$('paymentSave').textContent='Carregando pagamento...';
+ $('paymentMsg').textContent='Buscando lançamento original para evitar duplicidade.';
  $('paymentModal').style.display='flex';
- loadProducts().then(updatePaymentTotal);
+ const {data,error}=await db.from('caixa_movimentos').select('id,valor,forma').eq('tipo','pagamento').eq('estornado',false).eq('agendamento_id',booking.id).limit(2);
+ if(error||!data||data.length!==1){$('paymentMsg').textContent=error?'Erro: '+error.message:'Há mais de um pagamento (ou nenhum). Corrija manualmente após conferência do caixa.';$('paymentSave').textContent='Salvamento indisponível';return}
+ paidEditingMovement=data[0].id;
+ $('paymentValue').value=Number(data[0].valor).toFixed(2);
+ $('paymentMethod').value=data[0].forma==='pix_transferencia'?'pix':data[0].forma||'pix';
+ $('paymentSave').textContent='Salvar correção do pagamento';$('paymentSave').disabled=false;
+ $('paymentMsg').textContent='Somente valor e forma de pagamento. Produtos, extras e serviço não são alterados nesta versão.';
+ updatePaymentTotal();
 }
-function closePayment(){$('paymentModal').style.display='none';paymentBooking=null;$('paymentSave').disabled=false}
+
+function closePayment(){$('paymentModal').style.display='none';paymentBooking=null;paidEditingMovement=null;$('addPaymentProduct').disabled=false;$('addPaymentExtra').disabled=false;$('paymentSave').disabled=false}
 $('paymentCancel').addEventListener('click',closePayment);
 $('paymentModal').addEventListener('click',e=>{if(e.target===$('paymentModal'))closePayment()});
 $('paymentForm').addEventListener('submit',async e=>{
- e.preventDefault();if(!paymentBooking)return;
+ e.preventDefault();
+ if(paidEditingMovement!==null){
+  const id=paidEditingMovement,valor=Number($('paymentValue').value),forma=$('paymentMethod').value;
+  if(!Number.isFinite(valor)||valor<=0){$('paymentMsg').textContent='Informe um valor válido.';return}
+  if(!confirm('Confirmar correção do pagamento existente? O caixa será atualizado sem novo lançamento.'))return;
+  $('paymentSave').disabled=true;$('paymentMsg').textContent='Salvando correção...';
+  const {error}=await db.rpc('talento_corrigir_pagamento',{p_movimento_id:id,p_valor:valor,p_forma:forma});
+  $('paymentSave').disabled=false;
+  if(error){$('paymentMsg').textContent='Não foi possível salvar: '+error.message+'. Verifique se a função SQL foi instalada.';return}
+  closePayment();await loadAgenda();return;
+ }
+ if(!paymentBooking)return;
  const valor=Number($('paymentValue').value);if(!Number.isFinite(valor)||valor<=0)return;
  const b=paymentBooking,button=$('paymentSave');button.disabled=true;$('paymentMsg').textContent='Registrando pagamento...';
  const prof=state.professionals.find(p=>String(p.id)===String(b.profissional_id));
@@ -696,6 +711,7 @@ async function loadRealCommissions(){
 
 // Gestão de agendamentos: remarcação e cancelamento exigem permissão UPDATE no Supabase.
 let managedBooking=null;
+let paidEditingMovement=null;
 function closeManageBooking(){managedBooking=null;$('manageBookingModal').style.display='none'}
 $('manageBookingClose').addEventListener('click',closeManageBooking);
 $('manageBookingModal').addEventListener('click',e=>{if(e.target===$('manageBookingModal'))closeManageBooking()});
