@@ -469,6 +469,7 @@ async function loadPaymentMarks(){
  state.payments=data||[];
 }
 function openPayment(booking){
+ $('paymentTitle').textContent='Receber cliente';$('paymentSave').textContent='Confirmar recebimento';$('paymentSave').disabled=false;
  if(cancelled(booking.status)){alert('Agendamento cancelado: não é possível receber.');return}
  if(state.payments.some(p=>p.agendamento_id===booking.id)){alert('✓ Este cliente já está marcado como pago. Para corrigir, estorne o pagamento no Caixa.');return}
  const mensal=talentoPlanoDoAgendamento(booking);if(mensal&&!confirm('Este cliente tem um PLANO MENSAL ativo. O corte do plano não deve ser cobrado novamente. Deseja mesmo abrir o recebimento para cobrar algum serviço ou produto separado?'))return;
@@ -479,7 +480,24 @@ function openPayment(booking){
  $('paymentValue').value=svc?.preco!=null?Number(svc.preco).toFixed(2):'';
  $('paymentProducts').replaceChildren();$('paymentExtras').replaceChildren();$('paymentMethod').value='pix';$('paymentMsg').textContent='';loadProducts().then(updatePaymentTotal);$('paymentModal').style.display='flex';updatePaymentTotal();
 }
-function closePayment(){$('paymentModal').style.display='none';paymentBooking=null}
+// Editor de comanda paga em modo de preparação: nunca grava alterações financeiras sem RPC transacional.
+function openPaidComanda(booking,pagos){
+ closeManageBooking();paymentBooking=null;
+ const total=pagos.reduce((s,p)=>s+Number(p.valor||0),0);
+ const svc=state.services.find(s=>String(s.id)===String(booking.servico_id));
+ $('paymentTitle').textContent='📋 Editar comanda paga';
+ $('paymentClient').textContent='Cliente: '+(booking.cliente_nome||'Cliente');
+ $('paymentService').textContent='Serviço: '+(svc?.nome||'Não identificado')+' • '+localTime(booking.inicio);
+ $('paymentValue').value=total.toFixed(2);
+ $('paymentMethod').value=pagos[0]?.forma||'pix';
+ $('paymentProducts').replaceChildren();$('paymentExtras').replaceChildren();
+ $('paymentMsg').textContent='Você pode preparar as alterações, mas o salvamento financeiro ficará bloqueado até instalarmos a atualização segura no Supabase. O pagamento existente não será alterado.';
+ $('paymentSave').textContent='Salvar alterações (integração pendente)';
+ $('paymentSave').disabled=true;
+ $('paymentModal').style.display='flex';
+ loadProducts().then(updatePaymentTotal);
+}
+function closePayment(){$('paymentModal').style.display='none';paymentBooking=null;$('paymentSave').disabled=false}
 $('paymentCancel').addEventListener('click',closePayment);
 $('paymentModal').addEventListener('click',e=>{if(e.target===$('paymentModal'))closePayment()});
 $('paymentForm').addEventListener('submit',async e=>{
@@ -681,7 +699,7 @@ let managedBooking=null;
 function closeManageBooking(){managedBooking=null;$('manageBookingModal').style.display='none'}
 $('manageBookingClose').addEventListener('click',closeManageBooking);
 $('manageBookingModal').addEventListener('click',e=>{if(e.target===$('manageBookingModal'))closeManageBooking()});
-$('manageBookingReceive').addEventListener('click',()=>{const b=managedBooking;if(!b)return;const pagos=state.payments.filter(p=>String(p.agendamento_id)===String(b.id));if(pagos.length){$('manageBookingPayment').scrollIntoView({behavior:'smooth',block:'center'});return;}closeManageBooking();openPayment(b)});
+$('manageBookingReceive').addEventListener('click',()=>{const b=managedBooking;if(!b)return;const pagos=state.payments.filter(p=>String(p.agendamento_id)===String(b.id));if(pagos.length){openPaidComanda(b,pagos);return;}closeManageBooking();openPayment(b)});
 $('manageBookingPackage').addEventListener('click',async()=>{
  const b=managedBooking,match=talentoPlanoDoAgendamento(b);if(!match)return;
  closeManageBooking();showView('pacotes');$('pkgSearch').value=match.plano.cliente_telefone||match.plano.cliente_nome;
@@ -707,7 +725,7 @@ async function openManageBooking(b){
  const pagamentoTitulo=document.createElement('strong');pagamentoTitulo.textContent=paid?'✓ PAGAMENTO REGISTRADO':'⏳ PAGAMENTO PENDENTE';
  const pagamentoDetalhe=document.createElement('p');pagamentoDetalhe.textContent=paid?'Valor pago: '+brl(pagamentos.reduce((total,x)=>total+Number(x.valor||0),0))+' • Forma: '+pagamentos.map(x=>({dinheiro:'Dinheiro',pix:'Pix transferência',pix_maquina:'Pix máquina',debito:'Débito',credito:'Crédito'})[x.forma]||x.forma||'Não informada').join(', '):'Ainda não há recebimento confirmado para este agendamento.';
  painelPagamento.append(pagamentoTitulo,pagamentoDetalhe);
- $('manageBookingReceive').textContent=paid?'📋 Ver comanda paga':'💰 Abrir comanda / receber';$('manageBookingReceive').disabled=false;
+ $('manageBookingReceive').textContent='📋 Abrir comanda';$('manageBookingReceive').disabled=false;
  $('manageBookingCancel').disabled=paid;$('manageBookingSave').disabled=paid;
  if(paid)$('manageBookingMsg').textContent='Atendimento pago: estorne o recebimento no Caixa antes de alterar o agendamento.';
  $('manageBookingTime').value=localTime(b.inicio);$('manageBookingEnd').value=localTime(b.fim);
