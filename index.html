@@ -54,6 +54,20 @@ async function consultarOcupacoes(data, profissionalId) {
   if(error || !Array.isArray(ocupacoes)) throw error || new Error('Consulta de disponibilidade inválida');
   return ocupacoes;
 }
+async function consultarHorarioTrabalho(){
+ const semana=new Date(dados.data+'T12:00:00-03:00').getUTCDay();
+ const {data,error}=await db.rpc('talento_horario_publico',{p_profissional_id:dados.profissional.id,p_dia_semana:semana});
+ if(error)throw error;
+ return Array.isArray(data)?(data[0]||null):null;
+}
+function dentroDoExpediente(h,hora,duracao){
+ if(!h||!h.ativo||!h.inicio||!h.fim)return false;
+ const min=v=>Number(v.slice(0,2))*60+Number(v.slice(3,5));
+ const ini=min(hora),fim=ini+duracao;
+ if(ini<min(h.inicio)||fim>min(h.fim))return false;
+ if(h.intervalo_inicio&&h.intervalo_fim&&ini<min(h.intervalo_fim)&&fim>min(h.intervalo_inicio))return false;
+ return true;
+}
 async function buscarHorarios(){
   const seq=++consulta,alvo=document.getElementById('horarios');
   if(!alvo)return;
@@ -63,18 +77,21 @@ async function buscarHorarios(){
   }
   const semana=new Date(dados.data+'T12:00:00-03:00').getUTCDay();
   if(semana===0||semana===1){alvo.innerHTML='<p class="hint">Não atendemos domingo ou segunda-feira.</p>';return;}
-  let ocupacoes;
-  try { ocupacoes=await consultarOcupacoes(dados.data,dados.profissional.id); }
+  let ocupacoes,expediente;
+  try { [ocupacoes,expediente]=await Promise.all([consultarOcupacoes(dados.data,dados.profissional.id),consultarHorarioTrabalho()]); }
   catch(e){
     console.error('Erro na consulta de horários:',e);
     if(seq===consulta&&etapa===2){alvo.innerHTML='<p class="hint">Não foi possível verificar a disponibilidade. Tente novamente mais tarde.</p>';dados.hora='';}
     return;
   }
   if(seq!==consulta||etapa!==2)return;
-  const abertura=semana===6?8:9,fechamento=semana===6?18:20,duracao=dados.servico.minutos,lista=[];
-  for(let minutos=abertura*60;minutos+duracao<=fechamento*60;minutos+=20){
+  if(!expediente||!expediente.ativo){alvo.innerHTML='<p class="hint">Profissional sem expediente nesta data.</p>';dados.hora='';return;}
+  const min=v=>Number(v.slice(0,2))*60+Number(v.slice(3,5));
+  const abertura=min(expediente.inicio),fechamento=min(expediente.fim),duracao=dados.servico.minutos,lista=[];
+  for(let minutos=abertura;minutos+duracao<=fechamento;minutos+=20){
     const hora=String(Math.floor(minutos/60)).padStart(2,'0')+':'+String(minutos%60).padStart(2,'0');
     if(dados.data===hojeBR()&&hora<=agoraBR())continue;
+    if(!dentroDoExpediente(expediente,hora,duracao))continue;
     const inicio=new Date(`${dados.data}T${hora}:00-03:00`),fim=new Date(inicio.getTime()+duracao*60000);
     const ocupado=ocupacoes.some(a=>inicio<new Date(a.fim)&&fim>new Date(a.inicio));
     if(!ocupado)lista.push(hora);
@@ -88,7 +105,8 @@ if(!dados.hora||dados.data<hojeBR()){aviso('Escolha novamente um horário válid
 salvando=true;document.getElementById('confirmar').disabled=true;aviso('Salvando seu agendamento...');
 const inicio=new Date(`${dados.data}T${dados.hora}:00-03:00`),fim=new Date(inicio.getTime()+dados.servico.minutos*60000);
 try{
-  const ocupacoes=await consultarOcupacoes(dados.data,dados.profissional.id);
+  const [ocupacoes,expediente]=await Promise.all([consultarOcupacoes(dados.data,dados.profissional.id),consultarHorarioTrabalho()]);
+  if(!dentroDoExpediente(expediente,dados.hora,dados.servico.minutos))throw new Error('Horário fora do expediente. Escolha outro horário.');
   if(ocupacoes.some(a=>inicio<new Date(a.fim)&&fim>new Date(a.inicio))){
     throw new Error('Esse horário já está ocupado ou bloqueado. Volte e escolha outro horário.');
   }
